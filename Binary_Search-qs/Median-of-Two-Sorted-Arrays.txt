@@ -1,0 +1,240 @@
+Problem: Median of Two Sorted Arrays
+
+You are given two integer arrays nums1 and nums2 of size m and n respectively, where each is sorted in ascending order. Return the median value among all elements of the two arrays.
+
+Your solution must run in O(log(m+n)) time.
+
+🧪 Example 1:
+
+Input: nums1 = [1,2], nums2 = [3]
+Output: 2.0
+Explanation: Among [1, 2, 3] the median is 2.
+1. Problem Statement
+"Find the median of two sorted arrays with a time complexity of O(log(m+n))."
+
+📦 Input: nums1 = [1,2], nums2 = [3]
+
+🎯 Output: 2.0 — The median of the combined elements.
+
+2. Real-life Analogy
+Imagine you have two teams of students, each ranked by their exam scores. You want to find the middle-ranked student (or students) if you were to combine both teams into one. A brute-force approach would be to create a single list of all students and then find the median.
+
+The efficient way is to realize that the median must lie at a "split point" where half the students are to the left and half are to the right. You can use a binary search-like process to find this split point without actually merging the lists. You check a hypothetical split point in the smaller team's list, and based on whether it's too high or too low, you know which half of that team's list to search next.
+
+3. Thought Process — Natural Logic
+The O(log(m+n)) time complexity is the key constraint, ruling out a simple merge (O(m+n)). This immediately points to a Binary Search solution.
+
+The core idea is to find a "partition" in each array such that:
+
+We split the total m+n elements into two halves of roughly equal size.
+
+All elements in the "left half" are less than or equal to all elements in the "right half."
+
+Let's denote the smaller array as A (size m) and the larger as B (size n). We'll perform binary search on the smaller array to keep the search space small.
+
+We need to find a partitionA in A and a corresponding partitionB in B.
+
+The total number of elements in the left half should be (m+n+1) // 2.
+
+So, partitionA + partitionB = (m+n+1) // 2. This gives us partitionB = (m+n+1) // 2 - partitionA.
+
+Now, we check if the partitions are correct. This means the last element of the left half is less than or equal to the first element of the right half.
+
+maxLeftA <= minRightB
+
+maxLeftB <= minRightA
+
+If these conditions are met, we've found the correct partitions, and the median can be calculated from these four boundary elements.
+
+If maxLeftA > minRightB, partitionA is too far to the right. We need to move it to the left by setting high = partitionA - 1.
+
+If maxLeftB > minRightA, partitionA is too far to the left. We need to move it to the right by setting low = partitionA + 1.
+
+This binary search process continues until the correct partitions are found.
+
+4. Less Optimized Approach (Merging)
+Logic:
+
+Create a new array or list to store the merged elements.
+
+Use two pointers, one for nums1 and one for nums2, to merge the two sorted arrays into a single sorted array.
+
+Once the merged array is complete, find the median:
+
+If the total number of elements is odd, the median is at index (m+n)//2.
+
+If the total is even, the median is the average of elements at indices (m+n-1)//2 and (m+n)//2.
+
+⏳ Time Complexity: O(m+n)
+
+💾 Space Complexity: O(m+n) for the new array.
+
+5. Optimized Approach (Binary Search on Partitions)
+💡 Core Idea: Perform binary search on the smaller array's indices to find the optimal partition point that satisfies the median conditions.
+
+Logic:
+
+Ensure nums1 is the smaller array. If not, swap them.
+
+Set low = 0, high = len(nums1).
+
+total_len = len(nums1) + len(nums2).
+
+Loop while low <= high:
+
+partition1 = (low + high) // 2.
+
+partition2 = (total_len + 1) // 2 - partition1.
+
+Find the four boundary elements: maxLeft1, minRight1, maxLeft2, minRight2. Use float('-inf') and float('inf') for edge cases where a partition is at the start or end of an array.
+
+If maxLeft1 <= minRight2 and maxLeft2 <= minRight1:
+
+We've found the correct partition.
+
+If total_len is odd, return max(maxLeft1, maxLeft2).
+
+If total_len is even, return (max(maxLeft1, maxLeft2) + min(minRight1, minRight2)) / 2.
+
+If maxLeft1 > minRight2:
+
+The partition in nums1 is too far to the right. Move the high pointer: high = partition1 - 1.
+
+Otherwise (maxLeft2 > minRight1):
+
+The partition in nums1 is too far to the left. Move the low pointer: low = partition1 + 1.
+
+⏳ Time Complexity: O(log(min(m, n)))
+
+💾 Space Complexity: O(1)
+
+6. Pseudocode (with explanation)
+Function findMedianSortedArrays(nums1, nums2):
+    A = nums1, B = nums2
+    If len(A) > len(B):
+        swap(A, B)
+    
+    m = len(A), n = len(B)
+    low = 0, high = m
+    total_len = m + n
+    
+    While low <= high:
+        partitionA = (low + high) // 2
+        partitionB = (total_len + 1) // 2 - partitionA
+        
+        maxLeftA = A[partitionA - 1] if partitionA > 0 else -infinity
+        minRightA = A[partitionA] if partitionA < m else infinity
+        
+        maxLeftB = B[partitionB - 1] if partitionB > 0 else -infinity
+        minRightB = B[partitionB] if partitionB < n else infinity
+        
+        If maxLeftA <= minRightB and maxLeftB <= minRightA:
+            // Found the correct partitions
+            If total_len % 2 == 1:
+                return max(maxLeftA, maxLeftB)
+            Else:
+                return (max(maxLeftA, maxLeftB) + min(minRightA, minRightB)) / 2
+        Else If maxLeftA > minRightB:
+            // PartitionA is too far right, move left
+            high = partitionA - 1
+        Else:
+            // PartitionA is too far left, move right
+            low = partitionA + 1
+7. Python Code (with comments)
+Python
+
+def find_median_sorted_arrays(nums1, nums2):
+    # Ensure nums1 is the smaller array to optimize binary search.
+    if len(nums1) > len(nums2):
+        nums1, nums2 = nums2, nums1
+
+    m, n = len(nums1), len(nums2)
+    low, high = 0, m
+    total_len = m + n
+
+    while low <= high:
+        # Binary search on nums1 to find the partition.
+        partition1 = (low + high) // 2
+        # Calculate the corresponding partition for nums2.
+        partition2 = (total_len + 1) // 2 - partition1
+        
+        # Get the four boundary elements. Use -inf and inf for edge cases.
+        max_left_1 = nums1[partition1 - 1] if partition1 > 0 else float('-inf')
+        min_right_1 = nums1[partition1] if partition1 < m else float('inf')
+        
+        max_left_2 = nums2[partition2 - 1] if partition2 > 0 else float('-inf')
+        min_right_2 = nums2[partition2] if partition2 < n else float('inf')
+        
+        # Check if the partitions are valid.
+        if max_left_1 <= min_right_2 and max_left_2 <= min_right_1:
+            # We found the correct partitions.
+            if total_len % 2 == 1:
+                return float(max(max_left_1, max_left_2))
+            else:
+                return (max(max_left_1, max_left_2) + min(min_right_1, min_right_2)) / 2.0
+        elif max_left_1 > min_right_2:
+            # Partition in nums1 is too far right. Search in the left half.
+            high = partition1 - 1
+        else: # max_left_2 > min_right_1
+            # Partition in nums1 is too far left. Search in the right half.
+            low = partition1 + 1
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} nums1
+ * @param {number[]} nums2
+ * @return {number}
+ */
+function findMedianSortedArrays(nums1, nums2) {
+    if (nums1.length > nums2.length) {
+        [nums1, nums2] = [nums2, nums1];
+    }
+
+    const m = nums1.length;
+    const n = nums2.length;
+    let low = 0;
+    let high = m;
+    const totalLen = m + n;
+
+    while (low <= high) {
+        const partition1 = Math.floor((low + high) / 2);
+        const partition2 = Math.floor((totalLen + 1) / 2) - partition1;
+
+        const maxLeft1 = partition1 === 0 ? Number.MIN_SAFE_INTEGER : nums1[partition1 - 1];
+        const minRight1 = partition1 === m ? Number.MAX_SAFE_INTEGER : nums1[partition1];
+        
+        const maxLeft2 = partition2 === 0 ? Number.MIN_SAFE_INTEGER : nums2[partition2 - 1];
+        const minRight2 = partition2 === n ? Number.MAX_SAFE_INTEGER : nums2[partition2];
+        
+        if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {
+            if (totalLen % 2 === 1) {
+                return Math.max(maxLeft1, maxLeft2);
+            } else {
+                return (Math.max(maxLeft1, maxLeft2) + Math.min(minRight1, minRight2)) / 2;
+            }
+        } else if (maxLeft1 > minRight2) {
+            high = partition1 - 1;
+        } else {
+            low = partition1 + 1;
+        }
+    }
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+A, B = ..., swap(...)	Puts smaller array first	"I'll always work with the smaller list first to make my search space more efficient."
+while low <= high	Binary search loop	"I'll keep trying different split points in the smaller list."
+partitionA = ...	Finds a split point	"I'll choose a middle point in the smaller list."
+partitionB = ...	Finds corresponding split	"Based on my first split, I know where the split must be in the second list to keep the two 'halves' equal in size."
+maxLeft..., minRight...	Gets boundary values	"I'll find the four key numbers: the last number on the left of each split and the first number on the right."
+if maxLeftA <= ...	Checks if partitions are valid	"Are all the numbers on the left of my splits smaller than all the numbers on the right? If so, this is the right spot!"
+return ...	Calculates median	"I'll use the four boundary numbers to calculate the median correctly."
+high = ...	Moves search range	"My split in the first list was too far to the right, so I'll try a new split in the left half of my current search space."
+low = ...	Moves search range	"My split was too far to the left, so I'll try a new split in the right half of my current search space."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Merging)	O(m+n)	O(m+n)
+Optimized (Binary Search)	O(log(min(m, n)))	O(1)
+Note: m=len(nums1), n=len(nums2).	

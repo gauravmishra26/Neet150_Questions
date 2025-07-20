@@ -1,0 +1,144 @@
+Problem: Two Sum
+
+Given an array of integers nums and an integer target, return the indices i and j such that nums[i] + nums[j] == target and i != j.
+
+You may assume that every input has exactly one pair of indices i and j that satisfy the condition.
+Return the answer with the smaller index first.
+
+🧪 Example 1:
+
+Input: nums = [3,4,5,6], target = 7
+Output: [0,1]
+Explanation: nums[0] + nums[1] == 7, so we return [0, 1].
+1. Problem Statement
+"Given an array of integers nums and an integer target, return the indices i and j such that nums[i] + nums[j] == target and i != j."
+
+📦 Input: nums = [3,4,5,6], target = 7
+
+🎯 Output: [0,1] — because 3 (at index 0) + 4 (at index 1) equals 7.
+
+2. Real-life Analogy
+Imagine you are looking for two specific items at a store that add up to a target price. You have a list of all the item prices.
+
+You pick the first item ($3). To reach your target ($7), you need a second item that costs $4. You then need to search the rest of the store to see if an item with a price of $4 exists. If you find it, you're done!
+
+This is a search problem. You're trying to find a "complementary" number for each item, and the most efficient way to search is to have a list of prices you've already seen.
+
+3. Thought Process — Natural Logic
+Before writing code, ask yourself: what is the most straightforward way to solve this?
+
+I need to find a pair of numbers.
+
+For each number in the list, let's call it current_num, I need to find another number that equals target - current_num.
+
+Let's call this second number the complement.
+
+I need a way to check if the complement exists somewhere else in the list.
+
+The key is that for each number, you're looking for its specific complement.
+
+4. Brute-Force Approach
+The most direct way to solve this is to check every possible pair of numbers in the array.
+
+Logic: Use a nested loop. The outer loop iterates through each number at index i. The inner loop iterates through the rest of the array (starting from i+1) to find a number at index j. If nums[i] + nums[j] equals target, you've found the answer.
+
+⏳ Time Complexity: O(n²) — The nested loops mean that for each of the n elements, you might have to iterate through up to n other elements.
+
+💾 Space Complexity: O(1) — This approach uses no extra space beyond the input array.
+
+5. Optimized Approach (Using a Hash Map)
+💡 Core Idea: Keep a hash map to store the numbers you have already visited and their indices. This allows for very fast lookups.
+
+Create an empty hash map (let's call it seen). This map will store number -> index pairs.
+
+Iterate through the array nums with both the index (i) and the value (num) of each element.
+
+For each num, calculate its complement: complement = target - num.
+
+Check if the complement already exists as a key in your seen hash map.
+
+If it does, it means you've found the two numbers. The two indices are the value associated with the complement in the map, and the current index i. Return [seen[complement], i].
+
+If it does not, add the current number and its index to the seen hash map: seen[num] = i. This "remembers" the number for future checks.
+
+⏳ Time Complexity: O(n) — We only visit each element once. Hash map operations (lookup and insertion) take, on average, O(1) time.
+
+💾 Space Complexity: O(n) — In the worst-case scenario, we may need to store up to n elements in the hash map if no pair is found until the very last element.
+
+6. Pseudocode (with explanation)
+Function twoSum(nums, target):
+    // Create a hash map to store numbers we've seen and their indices.
+    Create an empty hash map called seen
+
+    // Loop through the array with both the index and the number.
+    For i from 0 to length of nums - 1:
+        current_num = nums[i]
+
+        // Calculate the value we need to find.
+        complement = target - current_num
+
+        // Check if the complement is in our seen hash map.
+        If complement exists as a key in seen:
+            // If yes, we've found the pair! Return its index and the current one.
+            // The stored index is smaller because we found it earlier in the loop.
+            Return [seen[complement], i]
+
+        // If no, add the current number and its index to the seen map.
+        Else:
+            seen[current_num] = i
+7. Python Code (with comments)
+Python
+
+def two_sum(nums, target):
+    seen = {}  # Using a dictionary as a hash map
+
+    # Iterate through the list with both the index (i) and the value (num)
+    for i, num in enumerate(nums):
+        complement = target - num  # Calculate the complement
+
+        # Check if the complement is in our hash map
+        if complement in seen:
+            # If we find it, return its stored index and the current index
+            # The stored index will always be the smaller one
+            return [seen[complement], i]
+
+        # If we haven't seen the complement yet, store the current number
+        # and its index for future checks
+        seen[num] = i
+8. JavaScript Code (with comments)
+JavaScript
+
+function twoSum(nums, target) {
+    // Create a new Map to store numbers we've seen and their indices.
+    const seen = new Map();
+
+    // Iterate through the array using a for loop to get both index and value.
+    for (let i = 0; i < nums.length; i++) {
+        const num = nums[i];
+        const complement = target - num;
+
+        // Check if the complement exists in our Map.
+        // The .has() method is very efficient for this.
+        if (seen.has(complement)) {
+            // If we find the complement, return its stored index and the current index.
+            // The stored index is guaranteed to be smaller.
+            return [seen.get(complement), i];
+        }
+
+        // If not found, add the current number and its index to the map.
+        seen.set(num, i);
+    }
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+seen = {} / new Map()	Creates an empty memory space for lookups	"A little notebook to remember prices I've seen and where they were."
+complement = target - num	Calculates the needed number	"If my target is $7 and I'm looking at a $3 item, I need to find a $4 item."
+if complement in seen	Checks if we've seen the complement before	"Have I already passed an item that costs $4?"
+seen[num] = i	Adds the current number and index to memory	"Not what I'm looking for, so I'll write down this item's price ($3) and its location (index 0) for later."
+return [seen[...], i]	Found the pair	"Found it! I'll take the location I wrote down and my current location."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force	O(n²)	O(1)
+Optimized Hash Map	O(n)	O(n)

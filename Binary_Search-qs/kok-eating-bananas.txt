@@ -1,0 +1,209 @@
+Problem: Koko Eating Bananas
+
+You are given an integer array piles where piles[i] is the number of bananas in the ith pile. You are also given an integer h, which represents the number of hours you have to eat all the bananas.
+
+You may decide your bananas-per-hour eating rate of k. Each hour, you may choose a pile of bananas and eats k bananas from that pile. If the pile has less than k bananas, you may finish eating the pile but you can not eat from another pile in the same hour.
+
+Return the minimum integer k such that you can eat all the bananas within h hours.
+
+🧪 Example 1:
+
+Input: piles = [1,4,3,2], h = 9
+Output: 2
+Explanation: With an eating rate of 2, you can eat the bananas in 6 hours. With an eating rate of 1, you would need 10 hours to eat all the bananas (which exceeds h=9), thus the minimum eating rate is 2.
+1. Problem Statement
+"Find the minimum eating rate k that allows Koko to finish all bananas in h hours. A higher k means a faster eating rate."
+
+📦 Input: piles = [1,4,3,2], h = 9
+
+🎯 Output: 2 — The minimum integer k to finish in time.
+
+2. Real-life Analogy
+Imagine you have a list of homework assignments, each with a different number of questions. You have a fixed number of hours to finish them. You need to decide how many questions to do per hour (k). You want to find the slowest pace (k) that still lets you finish all the homework within the time limit. The faster your pace, the less time it takes to finish.
+
+The problem has a monotonic property: if you can finish all the homework at a pace of k, you can also finish it at any faster pace k+1. This means we can use Binary Search on the answer itself.
+
+3. Thought Process — Natural Logic
+This is not a traditional binary search on an array. Instead, we are performing a binary search on the range of possible answers for k.
+
+Identify the Search Space: What is the possible range for k?
+
+The lowest possible rate is 1 banana per hour.
+
+The highest possible rate is the size of the largest pile. If Koko can eat that fast, she can finish any pile in a single hour, which is the fastest possible scenario.
+
+So, our search space is [1, max(piles)].
+
+Define a check function: We need a function can_finish(k) that takes a given eating rate k and returns true if Koko can finish within h hours, and false otherwise.
+
+To calculate the time needed for a pile p, we can use ceiling division: ceil(p / k).
+
+The total time is the sum of times for all piles.
+
+We return true if total_hours <= h.
+
+Perform Binary Search:
+
+Set low = 1 and high = max(piles).
+
+Initialize min_k to high.
+
+While low <= high:
+
+Calculate mid = low + (high - low) // 2.
+
+If can_finish(mid) is true:
+
+This mid is a possible answer. We store it and try to find an even smaller k by searching the left half: min_k = mid, high = mid - 1.
+
+If can_finish(mid) is false:
+
+This mid is too slow. We must search for a faster k in the right half: low = mid + 1.
+
+The final min_k is the answer.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Start with k = 1.
+
+In a loop, for each k, calculate the total hours needed to eat all the piles.
+
+The first k that allows Koko to finish within h hours is the minimum k.
+
+⏳ Time Complexity: O(max(piles) * n), where n is the number of piles. This is too slow given the constraints (piles[i] can be up to 1,000,000,000).
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Binary Search on the Answer)
+💡 Core Idea: The problem is a search for a threshold value in a monotonic function. Binary search is the perfect tool for this.
+
+Logic:
+
+Find the low and high bounds for the eating rate k. low = 1, high = max(piles).
+
+Use a while loop with low <= high.
+
+In each iteration, calculate mid.
+
+Call a helper function check(mid) to see if Koko can finish with a rate of mid.
+
+If check(mid) is true, it means mid is a possible answer. We store it and try to find a better (smaller) answer by searching the left half (high = mid - 1).
+
+If check(mid) is false, mid is too small. We must increase the rate by searching the right half (low = mid + 1).
+
+Return the smallest k found.
+
+⏳ Time Complexity: O(n log M), where n is the number of piles and M is the maximum number of bananas in a single pile. The log M comes from the binary search on the k values, and the n comes from the linear pass inside the check function.
+
+💾 Space Complexity: O(1)
+
+6. Pseudocode (with explanation)
+Function minEatingSpeed(piles, h):
+    // Helper function to check if a rate 'k' is feasible.
+    Function canFinish(k):
+        hours_needed = 0
+        For each pile in piles:
+            hours_needed += ceil(pile / k)
+        Return hours_needed <= h
+
+    // Binary search on the answer (k)
+    low = 1
+    high = max(piles)
+    min_k = high
+
+    While low <= high:
+        mid_k = low + (high - low) // 2
+        
+        If canFinish(mid_k):
+            // 'mid_k' is a possible answer, but we might do better (smaller).
+            min_k = mid_k
+            high = mid_k - 1
+        Else:
+            // 'mid_k' is too slow. We need a faster rate.
+            low = mid_k + 1
+            
+    Return min_k
+7. Python Code (with comments)
+Python
+
+import math
+
+def min_eating_speed(piles, h):
+    def can_finish(k):
+        hours = 0
+        for pile in piles:
+            # Ceiling division: math.ceil(pile / k)
+            hours += math.ceil(pile / k)
+        return hours <= h
+
+    low = 1
+    high = max(piles)
+    min_k = high
+
+    while low <= high:
+        mid_k = low + (high - low) // 2
+        
+        if can_finish(mid_k):
+            # This rate works, but maybe we can do better (slower).
+            min_k = mid_k
+            high = mid_k - 1
+        else:
+            # This rate is too slow. We must increase the rate.
+            low = mid_k + 1
+            
+    return min_k
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} piles
+ * @param {number} h
+ * @return {number}
+ */
+function minEatingSpeed(piles, h) {
+    // Helper function to check if a rate 'k' is feasible.
+    const canFinish = (k) => {
+        let hours = 0;
+        for (const pile of piles) {
+            // Ceiling division: Math.ceil(pile / k)
+            hours += Math.ceil(pile / k);
+        }
+        return hours <= h;
+    };
+
+    let low = 1;
+    let high = Math.max(...piles);
+    let minK = high;
+
+    while (low <= high) {
+        const midK = Math.floor(low + (high - low) / 2);
+        
+        if (canFinish(midK)) {
+            // This rate works, so we store it and look for a smaller one.
+            minK = midK;
+            high = midK - 1;
+        } else {
+            // This rate is too slow, so we need to search for a faster one.
+            low = midK + 1;
+        }
+    }
+    
+    return minK;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+low = 1, high = max(piles)	Defines search space	"I'll try a pace k between 1 (slowest) and the size of the biggest pile (fastest)."
+while low <= high	Binary search loop	"I'll keep trying different paces until I've found the best one."
+mid_k = ...	Chooses a pace to test	"I'll test the pace that's exactly in the middle of my current range."
+if canFinish(mid_k)	Checks feasibility	"Can I finish all the bananas in time at this pace?"
+high = mid_k - 1	Narrows search range	"Yes, this pace works! Maybe a slower pace would also work. I'll check all the paces from here down."
+low = mid_k + 1	Narrows search range	"No, this pace is too slow. I need to try a faster pace. I'll check all the paces from here up."
+return min_k	Final result	"The last working pace I found is the slowest one that still finishes in time. That's my answer."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Linear Scan)	O(max(piles) * n)	O(1)
+Optimized (Binary Search)	O(n log M)	O(1)
+Note: n is number of piles, M is max piles[i].

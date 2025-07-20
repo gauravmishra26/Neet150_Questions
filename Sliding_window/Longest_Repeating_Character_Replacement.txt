@@ -1,0 +1,212 @@
+Problem: Longest Repeating Character Replacement
+
+You are given a string s and an integer k. You can choose any character of the string and change it to any other uppercase English
+character. You can perform this operation at most k times.
+
+Return the length of the longest substring containing the same letter you can get after performing the above operations.
+
+Assume that the input string consists of only uppercase English letters.
+
+🧪 Example 1:
+
+Input: s = "AABABBA", k = 1
+Output: 4
+Explanation: We can replace the `A` at index 3 with `B` to get `AABBBA`, which has a longest substring of repeating `B`s of length 4.
+1. Problem Statement
+"Given a string s and a number k (replacements allowed), find the length of the longest substring of repeating characters you can form."
+
+📦 Input: s = "AABABBA", k = 1
+
+🎯 Output: 4 — We can change one 'A' to a 'B' to make the substring "BBBB".
+
+2. Real-life Analogy
+Imagine you have a long text document that needs to be simplified. You are allowed to use up to k "white-out" corrections.
+Your goal is to find the longest possible block of text that could be made into all the same letter by using your white-out.
+
+You slide a window over the text.
+
+Inside the window, you count how many of each letter you have.
+
+You find the most frequent letter.
+
+The number of letters you would need to change is (total letters in window) - (count of most frequent letter).
+
+If this number is k or less, your window is valid! You've found a potential longest sequence.
+
+If the number is greater than k, your window is too big. You have to shrink it from the left to remove characters until it's valid again.
+
+As you slide and resize the window, you continuously keep track of the maximum valid window size you've ever seen.
+
+3. Thought Process — Natural Logic
+This problem can be solved using the Sliding Window technique. We need to find the longest valid substring, where "valid" means the number
+of characters that are not the most frequent character is less than or equal to k.
+
+We use a left and right pointer to define the window.
+
+As we expand the window with the right pointer, we need to track the frequency of each character inside. A hash map or an array of
+size 26 is perfect for this.
+
+For any given window, we need to know two things: the total size of the window and the count of the most frequent character in that window.
+
+The number of replacements needed is window_size - max_frequency.
+
+If window_size - max_frequency > k, the window is invalid. We must shrink it by moving the left pointer to the right. We also update
+the character counts as we shrink.
+
+We don't need to recalculate max_frequency every single time we shrink the window. The current max_frequency will either stay
+the same or decrease, but (right - left + 1) will decrease faster, so the condition (window_size - max_frequency > k) will eventually
+ become false.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Use a nested loop to generate every possible substring.
+
+For each substring, count the frequency of each character.
+
+Find the most frequent character's count (max_freq).
+
+Calculate the number of replacements needed: substring_length - max_freq.
+
+If this number is k or less, it's a valid candidate for the longest substring. Update the longest_length.
+
+⏳ Time Complexity: O(n²) or O(n³).
+
+💾 Space Complexity: O(1) or O(k), depending on the implementation.
+
+5. Optimized Approach (Sliding Window)
+💡 Core Idea: Use a sliding window to check for the longest valid substring. The validity of the window is determined by whether
+the number of characters to be replaced is within the k limit.
+
+Logic:
+
+Initialize left = 0, longest_length = 0, and a frequency map char_freq (e.g., an array of size 26 initialized to 0s).
+
+Keep a variable max_freq to track the count of the most frequent character in the current window.
+
+Iterate with a right pointer from 0 to n-1.
+
+For each character s[right]:
+
+Increment its count in char_freq.
+
+Update max_freq = max(max_freq, char_freq[s[right]]).
+
+Window Validity Check: The condition (right - left + 1) - max_freq > k tells us if the window is too large.
+
+If it is, shrink the window: char_freq[s[left]]--, and left++.
+
+Update longest_length. While longest_length is not explicitly tracked inside the loop, the final (right - left + 1) after the loop
+implicitly tracks the longest valid window found. A cleaner approach is to update longest_length = max(longest_length, right - left + 1).
+An even cleaner one notes that (right-left+1) only increases or stays the same, so we don't need max_length. The final (right-left) is
+ the length.
+
+Let's use a cleaner approach: max_length is simply right - left + 1. We don't need a separate max_length variable because the window
+only shrinks when it's necessary. Thus, (right - left + 1) will always hold the length of the longest valid window seen so far.
+The final length is (right - left).
+
+⏳ Time Complexity: O(n) — Both pointers move only forward.
+
+💾 Space Complexity: O(1) — The frequency map is of a constant size (26 for uppercase English letters).
+
+6. Pseudocode (with explanation)
+Function characterReplacement(s, k):
+    left = 0
+    max_freq = 0
+    freq_map = empty dictionary/map
+
+    // Iterate with the right pointer.
+    For right from 0 to length of s - 1:
+        char_right = s[right]
+        Increment count for char_right in freq_map
+
+        // Update the most frequent character count in the current window.
+        max_freq = max(max_freq, freq_map[char_right])
+
+        // Check the validity of the current window.
+        // If window_size - max_freq > k, we have too many characters to replace.
+        If (right - left + 1) - max_freq > k:
+            char_left = s[left]
+            Decrement count for char_left in freq_map
+            left = left + 1
+
+    // The final length of the window is the answer.
+    Return (right - left + 1)
+7. Python Code (with comments)
+Python
+
+from collections import defaultdict
+
+def character_replacement(s, k):
+    char_freq = defaultdict(int)
+    left = 0
+    max_freq = 0
+
+    # Iterate with the right pointer to expand the window.
+    for right in range(len(s)):
+        # Increment the frequency of the current character.
+        char_freq[s[right]] += 1
+
+        # Update the maximum frequency found in the current window.
+        max_freq = max(max_freq, char_freq[s[right]])
+
+        # Check if the number of characters to replace exceeds k.
+        # This is `window_size - max_freq_count`.
+        if (right - left + 1) - max_freq > k:
+            # If so, shrink the window from the left.
+            char_freq[s[left]] -= 1
+            left += 1
+
+    # The final window size is the answer.
+    return (len(s) - left)
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {string} s
+ * @param {number} k
+ * @return {number}
+ */
+function characterReplacement(s, k) {
+    const charFreq = new Map();
+    let left = 0;
+    let maxFreq = 0;
+
+    for (let right = 0; right < s.length; right++) {
+        const charRight = s[right];
+        // Get the current count or 0, then increment.
+        charFreq.set(charRight, (charFreq.get(charRight) || 0) + 1);
+
+        // Update the max frequency in the current window.
+        maxFreq = Math.max(maxFreq, charFreq.get(charRight));
+
+        // Check if the current window is invalid.
+        // `(window size) - (most frequent char count) > k`
+        if ((right - left + 1) - maxFreq > k) {
+            const charLeft = s[left];
+            // Shrink the window from the left.
+            charFreq.set(charLeft, charFreq.get(charLeft) - 1);
+            left++;
+        }
+    }
+
+    // The final window size is the answer.
+    return s.length - left;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+left=0, max_freq=0	Initializes window & trackers	"I'll start with an empty window and no corrections used yet."
+for right in range(len(s))	Expands the window	"I'll slide my window to the right, one character at a time."
+char_freq[s[right]] += 1	Counts characters in window	"I'll update my count for this character in my notebook."
+max_freq = max(...)	Tracks most frequent char	"What's the count of the most common letter in my current window?"
+if (right-left+1) - max_freq > k	Checks window validity	"If I change all the uncommon letters to the most common one,
+will I exceed my limit of k corrections?"
+char_freq[s[left]]--	Shrinks the window	"My window is too big! I need to remove a character from the left side."
+return len(s)-left	Returns the final length	"The longest valid window I ever found had this length."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(n²)	O(1)
+Optimized (Sliding Window)	O(n)	O(1)
+Note: O(1) space because the character set is constant (26).

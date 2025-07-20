@@ -1,0 +1,190 @@
+Problem: Valid Parentheses
+
+You are given a string s consisting of the following characters: (, ), {, }, [ and ].
+
+The input string s is valid if and only if:
+
+Every open bracket is closed by the same type of close bracket.
+
+Open brackets are closed in the correct order.
+
+Every close bracket has a corresponding open bracket of the same type.
+
+Return true if s is a valid string, and false otherwise.
+
+🧪 Example 1:
+
+Input: s = "[]"
+Output: true
+1. Problem Statement
+"Given a string of brackets, determine if the brackets are validly matched and nested."
+
+📦 Input: s = "([{}])"
+
+🎯 Output: true — Each open bracket has a corresponding closing bracket of the same type in the correct order.
+
+2. Real-life Analogy
+Imagine you're checking a recipe that has steps grouped by ingredients. ( could mean "start adding spices", and ) means "done with spices". [ could mean "start adding flour", and ] means "done with flour". The rules are: you can't end a step you haven't started, and you must finish the last step you started before starting a new, broader step. For example, ( [ ] ) is valid, but ( ] ) is not.
+
+This "last in, first out" behavior is the defining characteristic of a Stack. You push a new task onto a stack and can only pop the most recent task off the top.
+
+3. Thought Process — Natural Logic
+The key to solving this problem efficiently is to recognize the "Last-In, First-Out" (LIFO) nature of bracket matching. The most recently opened bracket must be the first one to be closed. A Stack is the perfect data structure to model this behavior.
+
+We can iterate through the string one character at a time.
+
+When we encounter an opening bracket ((, [, {), we need to remember it for a later match. A stack is the perfect place to store it.
+
+When we encounter a closing bracket (), ], }), we need to check if it matches the most recently opened bracket. The top of the stack holds this.
+
+If it's a match, we can remove the opening bracket from the stack (the pop operation).
+
+If it's not a match, or if the stack is empty (meaning no opening brackets are available to match), we know the string is invalid.
+
+After processing the entire string, if the stack is empty, it means every opening bracket found had a corresponding closing bracket. If the stack is not empty, there are unmatched opening brackets, so the string is invalid.
+
+4. Less Optimized Approach (Iterative Removal)
+Logic:
+
+Repeatedly loop through the string, removing all occurrences of valid pairs like (), [], and {}.
+
+If the string becomes empty at the end, it was valid.
+
+Problem: This can be inefficient and complex to manage with strings. A simple string replacement in a loop could be O(n²).
+
+⏳ Time Complexity: O(n²) in the worst case.
+
+💾 Space Complexity: O(n) for string manipulation.
+
+5. Optimized Approach (Stack)
+💡 Core Idea: Use a stack to keep track of unclosed opening brackets in a LIFO order.
+
+Logic:
+
+Initialize an empty stack.
+
+Create a map or dictionary to store the pairs: {'(': ')', '[': ']', '{': '}'}.
+
+Iterate through each character c of the input string s.
+
+If c is an opening bracket ((, [, or {):
+
+Push it onto the stack.
+
+If c is a closing bracket (), ], or }):
+
+Check if the stack is empty. If it is, there's no opening bracket to match, so return false.
+
+Pop the top element from the stack.
+
+Check if the popped element and the current closing bracket form a valid pair. If they don't, return false.
+
+After the loop, check if the stack is empty.
+
+If it is, all brackets were matched. Return true.
+
+If it's not, there are unmatched opening brackets. Return false.
+
+⏳ Time Complexity: O(n) — We make a single pass through the string.
+
+💾 Space Complexity: O(n) — In the worst case (e.g., ((((...))))), the stack could hold up to n/2 elements.
+
+6. Pseudocode (with explanation)
+Function isValid(s):
+    stack = new empty list/stack
+    bracket_map = {'(': ')', '[': ']', '{': '}'}
+
+    For each character char in s:
+        // If it's an opening bracket, push it onto the stack.
+        If char is a key in bracket_map:
+            stack.push(char)
+        // If it's a closing bracket:
+        Else:
+            // If stack is empty, no open bracket to match.
+            If stack is empty:
+                Return false
+            
+            // Pop the last open bracket.
+            last_open = stack.pop()
+            
+            // Check if it's the correct match.
+            If bracket_map[last_open] is not char:
+                Return false
+
+    // After the loop, if the stack is empty, all brackets were matched.
+    Return stack is empty
+7. Python Code (with comments)
+Python
+
+def is_valid(s):
+    # Stack to hold opening brackets
+    stack = []
+    
+    # Map for pairs of brackets
+    bracket_map = {")": "(", "}": "{", "]": "["}
+    
+    for char in s:
+        # If it's a closing bracket, check for a match.
+        if char in bracket_map:
+            # If the stack is not empty and the top matches the expected opening bracket...
+            if stack and stack[-1] == bracket_map[char]:
+                stack.pop()
+            else:
+                return False
+        # If it's an opening bracket, push it onto the stack.
+        else:
+            stack.append(char)
+            
+    # The string is valid if the stack is empty at the end.
+    return not stack
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {string} s
+ * @return {boolean}
+ */
+function isValid(s) {
+    const stack = [];
+    const bracketMap = {
+        ')': '(',
+        '}': '{',
+        ']': '['
+    };
+
+    for (const char of s) {
+        // If the character is a closing bracket
+        if (bracketMap[char]) {
+            // Get the corresponding opening bracket
+            const requiredOpening = bracketMap[char];
+            
+            // If stack is empty or top doesn't match, it's invalid.
+            if (stack.length === 0 || stack[stack.length - 1] !== requiredOpening) {
+                return false;
+            } else {
+                stack.pop();
+            }
+        } else {
+            // If the character is an opening bracket, push it onto the stack.
+            stack.push(char);
+        }
+    }
+
+    // A valid string has an empty stack at the end.
+    return stack.length === 0;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+stack = []	Initializes a stack	"I'll use this as a place to hold my open brackets until they're closed."
+for char in s	Iterates through the string	"I'll read the string one character at a time."
+if char is an opening bracket	Handles open brackets	"I see an open bracket. I'll put it on top of my stack to remember to close it later."
+if stack is empty or ...	Handles closing brackets	"I see a close bracket. First, I need to check if there's an open bracket on top of my stack. If not, this is an error! If there is, I'll see if it's the right kind of bracket. If not, it's also an error!"
+stack.pop()	Pops the stack	"The brackets matched. I'll remove the open bracket from the top of my stack, as it's now closed."
+return not stack	Checks final state	"I've reached the end of the string. Is my stack empty? If so, every open bracket was correctly closed. If not, some were left open, so the string is invalid."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Iterative Removal)	O(n²)	O(n)
+Optimized (Stack)	O(n)	O(n)
+Note: n = len(s). The stack size is at most n/2.	

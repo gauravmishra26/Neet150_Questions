@@ -1,0 +1,212 @@
+Problem: Trapping Rain Water
+
+You are given an array of non-negative integers height which represent an elevation map. Each value height[i] represents the height of a bar, which has a width of 1.
+
+Return the maximum area of water that can be trapped between the bars.
+
+🧪 Example 1:
+
+Input: height = [0,2,0,3,1,0,1,3,2,1]
+Output: 9
+1. Problem Statement
+"Given a series of bars of varying heights, calculate the total volume of water that can be trapped between them after a rainfall."
+
+📦 Input: height = [0,2,0,3,1,0,1,3,2,1]
+
+🎯 Output: 9 — The total trapped water.
+
+2. Real-life Analogy
+Imagine a city skyline made of blocks of different heights. When it rains, water will collect in the dips between the buildings. The amount of water trapped at any given point is determined by the height of the surrounding buildings that act as "walls." A single point can only hold water up to the level of the shortest of the two tallest surrounding walls (one on the left and one on the right).
+
+3. Thought Process — Natural Logic
+The amount of water trapped at any position i depends on the tallest bar to its left and the tallest bar to its right. The water level at position i is min(max_left_height, max_right_height). The water trapped is then this water level minus the bar's own height: min(max_left_height, max_right_height) - height[i]. We just need to sum this value for every position.
+
+Brute-Force Approach: For each bar at index i, we can iterate to the left to find the maximum height and then iterate to the right to find the maximum height. This would be an O(n^2) solution, as we have nested loops.
+
+Optimized Approach (Two Arrays): We can improve this to O(n) time by first pre-calculating the maximum heights.
+
+Create a left_max array of the same size as height. In a single pass from left to right, fill left_max[i] with the maximum height from height[0] to height[i].
+
+Create a right_max array. In a single pass from right to left, fill right_max[i] with the maximum height from height[n-1] to height[i].
+
+Finally, iterate from i = 0 to n-1 and calculate the trapped water at each position: water_at_i = min(left_max[i], right_max[i]) - height[i]. Sum these values up.
+This approach is O(n) time but requires O(n) space for the two arrays.
+
+Most Optimal Approach (Two Pointers): We can solve this in O(n) time with O(1) space by using two pointers and avoiding the extra arrays. The key insight is that we only need the maximum height on each side up to our current position. We can maintain these maximums as we move the pointers.
+
+We use a left pointer and a right pointer, starting at the two ends of the array.
+
+We also maintain left_max and right_max variables.
+
+At each step, we move the pointer that points to the shorter bar. Why? Because the water level for the bar at the shorter side is constrained by its current maximum on that side, since we know there is a bar on the other side that is at least as tall.
+
+For example, if height[left] <= height[right], the water at the left pointer's position is determined by left_max. We then move left inward and continue.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Initialize total_water = 0.
+
+Loop from i = 0 to n-1.
+
+Inside the loop, find max_left by iterating from j = 0 to i.
+
+Find max_right by iterating from j = i to n-1.
+
+water_at_i = min(max_left, max_right) - height[i].
+
+Add water_at_i to total_water if it's positive.
+
+⏳ Time Complexity: O(n²)
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Two Pointers)
+💡 Core Idea: Use two pointers from the ends of the array, maintaining the maximum height seen on each side, to calculate trapped water in a single pass.
+
+Logic:
+
+Initialize left = 0, right = n-1, left_max = 0, right_max = 0, total_water = 0.
+
+Start a while loop that continues as long as left < right.
+
+Inside the loop, compare height[left] and height[right].
+
+If height[left] <= height[right]:
+
+The water level at left is limited by left_max.
+
+If height[left] >= left_max, update left_max = height[left] (no water trapped).
+
+Otherwise, add left_max - height[left] to total_water.
+
+Move left one step to the right.
+
+Else (height[left] > height[right]):
+
+The water level at right is limited by right_max.
+
+If height[right] >= right_max, update right_max = height[right].
+
+Otherwise, add right_max - height[right] to total_water.
+
+Move right one step to the left.
+
+The loop terminates when the pointers meet. Return total_water.
+
+⏳ Time Complexity: O(n)
+
+💾 Space Complexity: O(1)
+
+6. Pseudocode (with explanation)
+Function trap(height):
+    left = 0, right = length of height - 1
+    left_max = 0, right_max = 0
+    total_water = 0
+
+    While left < right:
+        If height[left] <= height[right]:
+            // We can calculate water at 'left' because we know a wall on the right
+            // exists that is at least as tall as the one at 'left'.
+            If height[left] >= left_max:
+                left_max = height[left]
+            Else:
+                total_water += left_max - height[left]
+            left += 1
+        Else:
+            // Similarly, we can calculate water at 'right'.
+            If height[right] >= right_max:
+                right_max = height[right]
+            Else:
+                total_water += right_max - height[right]
+            right -= 1
+
+    Return total_water
+7. Python Code (with comments)
+Python
+
+def trap(height):
+    if not height:
+        return 0
+
+    left, right = 0, len(height) - 1
+    left_max, right_max = 0, 0
+    total_water = 0
+
+    while left < right:
+        if height[left] <= height[right]:
+            # The current left bar is shorter than the current right bar.
+            # The water level at 'left' is determined by the max height on its left.
+            if height[left] >= left_max:
+                left_max = height[left]
+            else:
+                total_water += left_max - height[left]
+            left += 1
+        else:
+            # The current right bar is shorter.
+            # The water level at 'right' is determined by the max height on its right.
+            if height[right] >= right_max:
+                right_max = height[right]
+            else:
+                total_water += right_max - height[right]
+            right -= 1
+
+    return total_water
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} height
+ * @return {number}
+ */
+function trap(height) {
+    if (height.length === 0) {
+        return 0;
+    }
+
+    let left = 0;
+    let right = height.length - 1;
+    let leftMax = 0;
+    let rightMax = 0;
+    let totalWater = 0;
+
+    while (left < right) {
+        if (height[left] <= height[right]) {
+            // The water level at 'left' is limited by the left max.
+            if (height[left] >= leftMax) {
+                leftMax = height[left];
+            } else {
+                totalWater += leftMax - height[left];
+            }
+            left++;
+        } else {
+            // The water level at 'right' is limited by the right max.
+            if (height[right] >= rightMax) {
+                rightMax = height[right];
+            } else {
+                totalWater += rightMax - height[right];
+            }
+            right--;
+        }
+    }
+
+    return totalWater;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+left=0, right=..., total=0	Sets up the variables	"I'll use two pointers, one at each end, and a variable to store the total water."
+while left < right	Loop condition	"I'll keep going as long as my pointers haven't met."
+if height[left] <= ...	Chooses which side to process	"The bar on the left is shorter or equal. I can determine the water at this point for sure."
+if height[left] >= left_max	Updates the max height	"This bar is taller than any I've seen on the left so far. No water here, but this is my new max height for this side."
+else total_water += ...	Calculates and adds water	"This bar is shorter than my max. It can trap water. I'll add the amount to my total."
+left++	Moves the pointer	"I've processed this side, so I'll move inward."
+else ...	Processes the other side	"The bar on the right is shorter. I'll do the same process for the right side."
+return total_water	Returns the result	"I've processed the entire array, and this is the total water I've found."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force	O(n²)	O(1)
+Two Arrays	O(n)	O(n)
+Optimized Two Pointers	O(n)	O(1)
+Note: n is the number of elements in height.

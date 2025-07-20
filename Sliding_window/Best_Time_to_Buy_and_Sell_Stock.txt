@@ -1,0 +1,169 @@
+Problem: Best Time to Buy and Sell Stock
+
+You are given an array prices where prices[i] is the price of a given stock on the i-th day.
+
+You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.
+
+Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.
+
+🧪 Example 1:
+
+Input: prices = [7,1,5,3,6,4]
+Output: 5
+Explanation: Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5. Note that buying on day 2 and selling on day 1 is not allowed because you must sell after buying.
+1. Problem Statement
+"Given an array of stock prices, find the maximum profit you can make from a single buy and sell transaction."
+
+📦 Input: prices = [7,1,5,3,6,4]
+
+🎯 Output: 5 — Buy at price 1 and sell at price 6.
+
+2. Real-life Analogy
+Imagine you're standing in front of a stock ticker that shows a company's stock price for each day of the last month. Your goal is to find the single best day to have bought the stock and the single best day to have sold it after you bought it, to make the most money.
+
+You can't just find the lowest and highest prices, because the highest price might have occurred before the lowest price. Instead, as you look at each day's price, you need to ask yourself two questions:
+
+"What is the lowest price I could have bought this stock for so far?"
+
+"If I sell today, how much profit would I make with that lowest possible buy price?"
+
+By continuously keeping track of the lowest price seen so far and calculating the profit for each day's price against it, you will eventually find the single best buy/sell combination.
+
+3. Thought Process — Natural Logic
+The naive approach is to check every possible buy and sell day. For each day i, we can try to sell on every day j that comes after it (j > i). We then calculate the profit and keep track of the maximum. This is an O(n²) approach.
+
+The constraint is that we have to sell after we buy. This gives us a key insight: as we iterate through the prices day by day, we don't need to look ahead. For any given day i, to maximize profit, we should have bought on the day with the lowest price that occurred before day i.
+
+This leads to a single-pass O(n) solution.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Initialize max_profit = 0.
+
+Use a nested loop. The outer loop iterates with a buy_day pointer i from 0 to n-1.
+
+The inner loop iterates with a sell_day pointer j from i+1 to n-1.
+
+Calculate profit = prices[j] - prices[i].
+
+Update max_profit = max(max_profit, profit).
+
+⏳ Time Complexity: O(n²)
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Single Pass)
+💡 Core Idea: Iterate through the prices, keeping track of the minimum price seen so far and calculating the potential profit for each day.
+
+Logic:
+
+Initialize min_price to a very large number (or the first price in the array).
+
+Initialize max_profit to 0.
+
+Iterate through the prices array from left to right.
+
+For each price at index i:
+
+Update min_price: The lowest price to buy on or before this day is the minimum of min_price and the current price.
+
+Calculate max_profit: The profit you could make by selling on this day is price - min_price. Update max_profit with the larger of its current value and this new potential profit.
+
+After the loop finishes, max_profit will hold the maximum profit from any single buy/sell transaction.
+
+⏳ Time Complexity: O(n) — We make a single pass through the prices array.
+
+💾 Space Complexity: O(1) — We only use a few constant-space variables.
+
+6. Pseudocode (with explanation)
+Function maxProfit(prices):
+    // Handle edge case of less than 2 prices.
+    If length of prices is less than 2:
+        Return 0
+
+    // Initialize trackers for the minimum price and maximum profit.
+    min_price = prices[0]
+    max_profit = 0
+
+    // Iterate through the prices, starting from the second day.
+    For i from 1 to length of prices - 1:
+        current_price = prices[i]
+
+        // Step 1: Calculate the potential profit if we sell today.
+        current_profit = current_price - min_price
+
+        // Step 2: Update the overall maximum profit.
+        max_profit = max(max_profit, current_profit)
+        
+        // Step 3: Update the minimum price seen so far.
+        min_price = min(min_price, current_price)
+
+    Return max_profit
+7. Python Code (with comments)
+Python
+
+def max_profit(prices):
+    if not prices or len(prices) < 2:
+        return 0
+
+    # Initialize min_price to the first price and max_profit to 0.
+    min_price = prices[0]
+    max_profit = 0
+
+    # Iterate through the prices starting from the second day.
+    for price in prices[1:]:
+        # Calculate the potential profit if we sell today.
+        current_profit = price - min_price
+        
+        # Update the overall maximum profit.
+        max_profit = max(max_profit, current_profit)
+
+        # Update the minimum price we've seen so far.
+        min_price = min(min_price, price)
+    
+    return max_profit
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} prices
+ * @return {number}
+ */
+function maxProfit(prices) {
+    if (!prices || prices.length < 2) {
+        return 0;
+    }
+
+    // Initialize minPrice to the first price and maxProfit to 0.
+    let minPrice = prices[0];
+    let maxProfit = 0;
+
+    // Iterate through the prices.
+    for (let i = 1; i < prices.length; i++) {
+        const currentPrice = prices[i];
+        
+        // Update the minimum price seen so far.
+        minPrice = Math.min(minPrice, currentPrice);
+
+        // Calculate the profit if we sell today and update maxProfit.
+        const potentialProfit = currentPrice - minPrice;
+        maxProfit = Math.max(maxProfit, potentialProfit);
+    }
+
+    return maxProfit;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+min_price = ...	Initializes a tracker for min price	"I'll start by assuming the lowest price to buy is the first day's price."
+max_profit = 0	Initializes a tracker for max profit	"I'll start with zero profit, as I haven't made a transaction yet."
+for price in prices	Iterates through the prices	"I'll go through the days one by one."
+current_profit = price - min_price	Calculates current profit	"If I sell today, what's my profit against the lowest price I've seen so far?"
+max_profit = max(...)	Updates the max profit	"Is this new profit the biggest I've seen?"
+min_price = min(...)	Updates the min price	"Now, I'll update my record for the lowest price seen up to this point."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(n²)	O(1)
+Optimized (Single Pass)	O(n)	O(1)

@@ -1,0 +1,211 @@
+Problem: Permutation in String
+
+You are given two strings s1 and s2. Return true if s2 contains a permutation of s1, or false otherwise. That means if a permutation of s1 exists as a substring of s2, then return true.
+
+Both strings only contain lowercase letters.
+
+🧪 Example 1:
+
+Input: s1 = "abc", s2 = "lecabee"
+Output: true
+Explanation: The substring "cab" is a permutation of "abc" and is present in "lecabee".
+1. Problem Statement
+"Given two strings s1 and s2, return true if s2 contains a permutation of s1 as a substring."
+
+📦 Input: s1 = "abc", s2 = "lecabee"
+
+🎯 Output: true — The letters 'a', 'b', and 'c' appear contiguously in s2 as "cab".
+
+2. Real-life Analogy
+Imagine you have a keyword, say "race", and you're searching a long text for that keyword. The twist is that the letters of the keyword might be jumbled up, as long as they appear together. For example, you would consider "care" or "acer" a valid find. The problem is to see if any contiguous block of text has the exact same letters (and same letter counts) as your keyword.
+
+3. Thought Process — Natural Logic
+This problem can be rephrased as: "Does any substring of s2 of length s1.length have the same character counts as s1?"
+
+A brute-force approach would be to check every single substring of s2 that has the same length as s1. This would be very inefficient. The observation that we are looking for a property within a contiguous block of a fixed size is a perfect fit for the Sliding Window technique.
+
+The window size is fixed at len(s1). We can slide a window of this size across s2, and for each window, we check if the character counts match s1.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Get the length of s1, let's call it m.
+
+Iterate through s2 with a for loop, from index i to n-m. This defines the start of a substring of length m.
+
+For each substring, check if it is a permutation of s1.
+
+To check for a permutation, a simple way is to get the frequency count of characters for both strings and compare them.
+
+⏳ Time Complexity: O(n*m) where n = len(s2) and m = len(s1). The outer loop runs n-m+1 times, and the inner frequency count and comparison takes O(m).
+
+💾 Space Complexity: O(1) — We only use a fixed-size array for character counts.
+
+5. Optimized Approach (Sliding Window)
+💡 Core Idea: Use a fixed-size sliding window. Instead of re-computing the frequency map for each window, we can efficiently update it as we slide.
+
+Data Structures: An array of size 26 is used as a frequency map for lowercase English letters.
+
+Logic:
+
+First, check if len(s1) is greater than len(s2). If so, it's impossible to find a permutation, so return false.
+
+Create two frequency arrays, s1_counts and s2_window_counts, both of size 26.
+
+Initialization:
+
+Populate s1_counts with the character frequencies of s1.
+
+Populate s2_window_counts with the character frequencies of the first window of s2 (from index 0 to len(s1)-1).
+
+Check First Window: Compare s1_counts and s2_window_counts. If they are identical, return true.
+
+Slide the Window: Use a for loop with a right pointer, starting from len(s1) to len(s2)-1.
+
+The character at s2[right] enters the window. Increment its count in s2_window_counts.
+
+The character at s2[left] (where left = right - len(s1)) leaves the window. Decrement its count.
+
+Compare the updated s2_window_counts with s1_counts. If they are identical, return true.
+
+If the loop completes without finding a match, return false.
+
+⏳ Time Complexity: O(n + m) which simplifies to O(n) where n = len(s2) and m = len(s1). The initial count takes O(m), and the single pass takes O(n-m).
+
+💾 Space Complexity: O(1) — The two frequency arrays are of constant size (26).
+
+6. Pseudocode (with explanation)
+Function checkInclusion(s1, s2):
+    m = length of s1
+    n = length of s2
+
+    If m > n:
+        Return false
+
+    // Create frequency maps for s1 and the initial window of s2.
+    s1_counts = new array of size 26, all zeros
+    window_counts = new array of size 26, all zeros
+
+    // Populate counts for s1 and the first window of s2.
+    For i from 0 to m-1:
+        s1_counts[char_to_index(s1[i])] = s1_counts[char_to_index(s1[i])] + 1
+        window_counts[char_to_index(s2[i])] = window_counts[char_to_index(s2[i])] + 1
+
+    // Check if the first window is a permutation.
+    If s1_counts is equal to window_counts:
+        Return true
+
+    // Slide the window across s2.
+    For right from m to n-1:
+        // Add new character from the right.
+        window_counts[char_to_index(s2[right])] = window_counts[char_to_index(s2[right])] + 1
+        // Remove old character from the left.
+        left = right - m
+        window_counts[char_to_index(s2[left])] = window_counts[char_to_index(s2[left])] - 1
+
+        // Check if the updated window is a permutation.
+        If s1_counts is equal to window_counts:
+            Return true
+
+    Return false
+7. Python Code (with comments)
+Python
+
+def check_inclusion(s1, s2):
+    m, n = len(s1), len(s2)
+    if m > n:
+        return False
+
+    # Create frequency maps of size 26 for lowercase English letters.
+    s1_counts = [0] * 26
+    window_counts = [0] * 26
+
+    # Populate counts for s1 and the initial window of s2.
+    for i in range(m):
+        s1_counts[ord(s1[i]) - ord('a')] += 1
+        window_counts[ord(s2[i]) - ord('a')] += 1
+    
+    # Check if the first window is a permutation.
+    if s1_counts == window_counts:
+        return True
+
+    # Slide the window across s2.
+    for right in range(m, n):
+        # Add the new character from the right.
+        window_counts[ord(s2[right]) - ord('a')] += 1
+        
+        # Remove the old character from the left.
+        left = right - m
+        window_counts[ord(s2[left]) - ord('a')] -= 1
+        
+        # Check for a match.
+        if s1_counts == window_counts:
+            return True
+
+    return False
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {string} s1
+ * @param {string} s2
+ * @return {boolean}
+ */
+function checkInclusion(s1, s2) {
+    const m = s1.length;
+    const n = s2.length;
+    if (m > n) {
+        return false;
+    }
+
+    // Create frequency arrays of size 26.
+    const s1Counts = new Array(26).fill(0);
+    const windowCounts = new Array(26).fill(0);
+
+    // Helper function to get the character's index (0-25).
+    const charToIndex = (char) => char.charCodeAt(0) - 'a'.charCodeAt(0);
+
+    // Populate counts for s1 and the initial window of s2.
+    for (let i = 0; i < m; i++) {
+        s1Counts[charToIndex(s1[i])]++;
+        windowCounts[charToIndex(s2[i])]++;
+    }
+
+    // Check if the first window is a permutation.
+    if (s1Counts.every((count, i) => count === windowCounts[i])) {
+        return true;
+    }
+
+    // Slide the window across s2.
+    for (let right = m; right < n; right++) {
+        // Add the new character.
+        windowCounts[charToIndex(s2[right])]++;
+        
+        // Remove the old character from the left.
+        const left = right - m;
+        windowCounts[charToIndex(s2[left])]--;
+        
+        // Check for a match.
+        if (s1Counts.every((count, i) => count === windowCounts[i])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+s1_counts = ...	Creates frequency maps	"I'll count the letters in s1 and put them in a table. Then I'll count the letters in my first s2 window and put them in another table."
+for i in range(m)	Initializes the first window	"I'll fill up both tables with the counts from the first m letters of each string."
+if s1_counts == window_counts	Compares the first window	"Do the two tables look exactly the same? If so, I'm done."
+for right in range(m, n)	Slides the window	"Now, I'll slide the window one letter at a time."
+window_counts[...]++	Adds a new character	"A new letter just entered my window. I'll update its count in the s2 table."
+window_counts[...]--	Removes an old character	"The letter on the far left just left my window. I'll decrease its count."
+if s1_counts == window_counts	Checks the new window	"After updating my s2 table, does it match the s1 table? If so, I'm done."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(n*m)	O(1)
+Optimized (Sliding Window)	O(n+m)	O(1)
+Note: n=len(s2), m=len(s1). O(1) space because the character set is constant.	

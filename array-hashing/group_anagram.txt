@@ -1,0 +1,167 @@
+Problem: Group Anagrams
+
+Given an array of strings strs, group all anagrams together into sublists. You may return the output in any order.
+
+An anagram is a string that contains the exact same characters as another string, but the order of the characters can be different.
+
+🧪 Example 1:
+
+Input: strs = ["act","pots","tops","cat","stop","hat"]
+Output: [["hat"],["act", "cat"],["stop", "pots", "tops"]]
+1. Problem Statement
+"Given an array of strings strs, group all anagrams together into sublists. You may return the output in any order."
+
+📦 Input: strs = ["act","pots","tops","cat","stop","hat"]
+
+🎯 Output: [["hat"],["act", "cat"],["stop", "pots", "tops"]] — The strings are grouped by their anagrams.
+
+2. Real-life Analogy
+Imagine you have a large pile of Scrabble tiles, each forming a word. You want to sort them into groups where each group contains words made from the same set of letters.
+
+A great way to do this is to take each word and re-arrange its tiles in alphabetical order. For example:
+
+"act" becomes "act"
+
+"cat" becomes "act"
+
+"stop" becomes "opst"
+
+"pots" becomes "opst"
+
+"tops" becomes "opst"
+
+Now, all the words that are anagrams of each other share the same new, sorted form. You can just look at this sorted form and put all words with the same one into a single group. The sorted word acts as a unique "signature" for each group of anagrams.
+
+3. Thought Process — Natural Logic
+The core property of anagrams is that they contain the exact same characters with the exact same frequencies. The order doesn't matter.
+
+This means we need a way to assign a unique identifier to each string that is the same for all its anagrams. This identifier is often called a canonical form or a signature.
+
+The simplest and most reliable way to create this signature is to sort the characters of the string.
+
+"act" -> "act"
+
+"cat" -> "act"
+
+"pots" -> "opst"
+
+We can then use this signature to group the words.
+
+4. Optimized Approach (Using a Hash Map)
+The most efficient solution is to use a hash map to store the groups.
+
+The key of the hash map will be the canonical form (the sorted string).
+
+The value will be a list of all the original strings that share that canonical form.
+
+Logic:
+
+Create an empty hash map, let's call it anagram_groups.
+
+Iterate through each string s in the input array strs.
+
+For each string s, calculate its canonical form by sorting its characters.
+
+Use this canonical form as a key to access anagram_groups.
+
+If the key already exists, append the original string s to the list of strings stored under that key.
+
+If the key does not exist, create a new entry in the map with the canonical form as the key and a new list containing s as the value.
+
+After iterating through all strings, the values of the hash map are your final groups.
+
+⏳ Time Complexity: O(N * K log K)
+
+N is the number of strings in the input array.
+
+K is the maximum length of a string.
+
+We iterate through N strings. For each string, we sort it, which takes O(K log K) time.
+
+💾 Space Complexity: O(N * K)
+
+In the worst case, we might need to store every single character from all strings in our hash map.
+
+5. Pseudocode (with explanation)
+Function groupAnagrams(strs):
+    // Create a hash map to hold our groups. Keys are sorted strings, values are lists of original strings.
+    Create an empty hash map called anagram_groups
+
+    // Iterate through each string in the input array.
+    For each string s in strs:
+
+        // Create the canonical form (the key) by sorting the characters of the string.
+        sorted_s = sort characters of s
+
+        // Check if this canonical form is already a key in our map.
+        If sorted_s is a key in anagram_groups:
+            // If yes, append the original string s to the list.
+            Append s to the list at anagram_groups[sorted_s]
+
+        // If the key is new.
+        Else:
+            // Create a new list with the current string and add it to the map.
+            anagram_groups[sorted_s] = a new list containing s
+
+    // The result is all the lists stored as values in our hash map.
+    Return the values of anagram_groups
+6. Python Code (with comments)
+Python
+
+from collections import defaultdict
+
+def group_anagrams(strs):
+    # defaultdict simplifies the process. It automatically creates a new list
+    # for a key if it doesn't exist, so we don't have to check.
+    anagram_groups = defaultdict(list)
+
+    # Iterate through each string in the input array.
+    for s in strs:
+        # Create the canonical form by sorting the characters.
+        # sorted() returns a list of characters, so we join it back into a string.
+        sorted_s = "".join(sorted(s))
+
+        # Use the sorted string as the key and append the original string to the list.
+        anagram_groups[sorted_s].append(s)
+
+    # The values of the defaultdict are the grouped lists.
+    return list(anagram_groups.values())
+
+7. JavaScript Code (with comments)
+JavaScript
+
+function groupAnagrams(strs) {
+    // A Map is used to group anagrams. The keys will be the sorted strings,
+    // and the values will be arrays of the original strings.
+    const anagramGroups = new Map();
+
+    // Iterate through each string in the input array.
+    for (const s of strs) {
+        // Create the canonical form by splitting the string into an array of characters,
+        // sorting it, and then joining it back into a string.
+        const sortedS = s.split('').sort().join('');
+
+        // If the sorted string (the key) is not yet in the map,
+        // we initialize it with a new array containing the current string.
+        if (!anagramGroups.has(sortedS)) {
+            anagramGroups.set(sortedS, []);
+        }
+
+        // Now we can safely add the original string to the array associated with the key.
+        anagramGroups.get(sortedS).push(s);
+    }
+
+    // The result is all the values (the arrays of grouped strings) from our Map.
+    return Array.from(anagramGroups.values());
+}
+8. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+sorted(s) / s.split().sort().join()	Creates a canonical form for each word	"This turns cat and act into the same act for easy grouping."
+anagram_groups = defaultdict(list) / new Map()	Creates a grouping memory	"A set of labeled folders, where the label is the sorted word (e.g., 'act')."
+anagram_groups[sorted_s].append(s)	Adds a word to its group	"Find the folder labeled 'act' and put the word cat inside."
+return list(anagram_groups.values())	Retrieves all the lists from memory	"Give me all the words from every folder to see the final groups."
+
+Export to Sheets
+9. Summary
+Method	Time	Space
+Optimized (Hash Map + Sort)	O(N * K log K)	O(N * K)

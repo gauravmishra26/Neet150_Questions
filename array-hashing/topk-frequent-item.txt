@@ -1,0 +1,189 @@
+Problem: Top K Frequent Elements
+
+Given an integer array nums and an integer k, return the k most frequent elements within the array.
+
+The test cases are generated such that the answer is always unique.
+You may return the output in any order.
+
+🧪 Example 1:
+
+Input: nums = [1,2,2,3,3,3], k = 2
+Output: [2,3]
+1. Problem Statement
+"Given an integer array nums and an integer k, return the k most frequent elements within the array."
+
+📦 Input: nums = [1,2,2,3,3,3], k = 2
+
+🎯 Output: [2,3] — because 3 appears 3 times, and 2 appears 2 times, making them the two most frequent elements.
+
+2. Real-life Analogy
+Imagine you have a list of items sold from a vending machine, and you want to find the top k best-sellers.
+
+First, you go through the entire list and count how many times each unique item was sold. For example:
+
+Item A: 5 times
+
+Item B: 12 times
+
+Item C: 3 times
+
+Item D: 12 times
+
+Item E: 1 time
+
+Next, you need to find the top k items based on these counts. If k=2, you'd look at the counts and find that B and D are the most frequent with 12 sales each.
+
+The problem breaks down into these two distinct steps: counting and selecting the top K.
+
+3. Thought Process — Natural Logic
+The two main tasks are:
+
+Frequency Counting: The best way to count the occurrences of items in an unordered list is with a hash map. This allows you to quickly look up and update the count for each unique number.
+
+Selecting the Top K: Once you have all the frequencies, how do you find the k largest ones? You could sort the list of (number, count) pairs, but sorting takes time. There are more clever ways to do this in linear time.
+
+4. Brute-Force Approach (Sorting)
+A straightforward, but less optimized, approach is to use sorting.
+
+Logic:
+
+Use a hash map to count the frequency of each number.
+
+Convert the hash map's key-value pairs into a list of tuples (e.g., [(number, count), ...]).
+
+Sort this list in descending order based on the count.
+
+Take the first k elements from the sorted list.
+
+⏳ Time Complexity: O(N log N)
+
+Counting frequencies is O(N).
+
+Converting to a list is O(U) where U is the number of unique elements.
+
+Sorting the list is O(U log U), which in the worst case can be O(N log N).
+
+💾 Space Complexity: O(N) — We store all unique elements and their counts in the hash map.
+
+5. Optimized Approach (Bucket Sort)
+💡 Core Idea: We can use the frequencies themselves as indices to an array, effectively "sorting" in linear time. This is also known as a Bucket Sort or Counting Sort approach.
+
+Logic:
+
+First, use a hash map to count the frequencies of all numbers in the input array. This takes O(N) time.
+
+Create an array of lists, which we'll call buckets, with size N+1. The index of the array represents the frequency, and the list at that index will store all numbers with that frequency. For example, buckets[3] will hold all numbers that appeared 3 times.
+
+Iterate through the hash map. For each (number, frequency) pair, append the number to the list at buckets[frequency].
+
+Iterate through the buckets array from the end (highest frequency) down to the beginning.
+
+Collect the numbers from each bucket until you have collected k elements.
+
+⏳ Time Complexity: O(N)
+
+Frequency counting is O(N).
+
+Iterating through the hash map and placing items into buckets is O(N).
+
+Iterating through the buckets to get the top k is at most O(N) because we only visit each number once.
+
+💾 Space Complexity: O(N) — In the worst case, every number is unique, and both the hash map and the buckets array will have N elements in total.
+
+6. Pseudocode (with explanation)
+Function topKFrequent(nums, k):
+    // Step 1: Count the frequency of each number using a hash map.
+    Create a hash map called freq_counts
+
+    For each num in nums:
+        Increment count for num in freq_counts
+
+    // Step 2: Create an array of lists to act as buckets, where the index is the frequency.
+    Create a list of empty lists called buckets of size length(nums) + 1
+
+    // Step 3: Put each number into its corresponding frequency bucket.
+    For each (num, freq) pair in freq_counts:
+        Append num to buckets[freq]
+
+    // Step 4: Collect the top k elements by iterating from the highest frequency.
+    Create an empty list called result
+
+    For freq from length(nums) down to 1:
+        For each num in buckets[freq]:
+            Append num to result
+            If length(result) is equal to k:
+                Return result
+7. Python Code (with comments)
+Python
+
+from collections import Counter
+
+def top_k_frequent(nums, k):
+    # Step 1: Count frequencies using a Counter (specialized hash map).
+    counts = Counter(nums)
+
+    # Step 2: Create an array of lists to serve as our buckets.
+    # The size is len(nums) + 1 because a number's frequency can be up to len(nums).
+    buckets = [[] for _ in range(len(nums) + 1)]
+
+    # Step 3: Populate the buckets.
+    # Iterate through the (number, frequency) pairs in our counts map.
+    for num, freq in counts.items():
+        buckets[freq].append(num)
+
+    # Step 4: Collect the k most frequent elements.
+    result = []
+    # Iterate backwards from the highest possible frequency to 1.
+    for i in range(len(buckets) - 1, 0, -1):
+        # Add all numbers from the current frequency bucket to the result.
+        for num in buckets[i]:
+            result.append(num)
+            # If we have collected k elements, we can stop and return.
+            if len(result) == k:
+                return result
+8. JavaScript Code (with comments)
+JavaScript
+
+function topKFrequent(nums, k) {
+    // Step 1: Count frequencies using a Map.
+    const counts = new Map();
+    for (const num of nums) {
+        counts.set(num, (counts.get(num) || 0) + 1);
+    }
+
+    // Step 2: Create an array of arrays (buckets) to group numbers by frequency.
+    // We add 1 because frequency can be 0.
+    const buckets = Array.from({ length: nums.length + 1 }, () => []);
+
+    // Step 3: Populate the buckets.
+    for (const [num, freq] of counts.entries()) {
+        buckets[freq].push(num);
+    }
+
+    // Step 4: Collect the k most frequent elements.
+    const result = [];
+    // Iterate backwards from the end of the buckets array (highest frequency).
+    for (let i = buckets.length - 1; i > 0; i--) {
+        // Add all numbers from the current frequency bucket.
+        for (const num of buckets[i]) {
+            result.push(num);
+            if (result.length === k) {
+                return result;
+            }
+        }
+    }
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+counts = Counter(nums)	Counts the frequency of each number	"Tally up how many times each item appears."
+buckets = [[] for _ in range(n + 1)]	Creates an array for grouping by count	"A set of numbered bins. Bin #5 is for items that appeared 5 times."
+buckets[freq].append(num)	Puts numbers into their frequency bins	"Item 3 appeared 3 times, so I'll put it in bin #3."
+for i from n to 1:	Iterates from highest to lowest frequency	"Start at the highest-numbered bin and work my way down."
+result.append(num)	Collects the numbers	"Take all the items out of this bin and add them to my 'top items' list."
+if len(result) == k	Checks if we have enough items	"Do I have enough top sellers yet? If so, I'm done."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Sort)	O(N log N)	O(N)
+Optimized (Bucket Sort)	O(N)	O(N)

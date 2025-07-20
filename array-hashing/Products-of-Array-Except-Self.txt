@@ -1,0 +1,176 @@
+Problem: Products of Array Except Self
+
+Given an integer array nums, return an array output where output[i] is the product of all the elements of nums except nums[i].
+
+Each product is guaranteed to fit in a 32-bit integer.
+
+Follow-up: Could you solve it in O(n) time without using the division operation?
+
+🧪 Example 1:
+
+Input: nums = [1,2,4,6]
+Output: [48,24,12,8]
+1. Problem Statement
+"Given an integer array nums, return an array output where output[i] is the product of all the elements of nums except nums[i]."
+
+📦 Input: nums = [1,2,4,6]
+
+🎯 Output: [48,24,12,8]
+
+output[0] = 2 * 4 * 6 = 48
+
+output[1] = 1 * 4 * 6 = 24
+
+output[2] = 1 * 2 * 6 = 12
+
+output[3] = 1 * 2 * 4 = 8
+
+2. Real-life Analogy
+Imagine a group of people, and each person has a number of apples. You want to create a new list where each person's entry is the product of all the other people's apple counts.
+
+You could go around and ask everyone for their apple count, then multiply them all together. Then you would divide by your own count to get the result. But what if someone has zero apples? You can't divide by zero! The "no division" constraint forces a more clever solution.
+
+Instead, you need a different strategy. You can send one person down the line from left to right, keeping a running tally of the products of everyone they've passed so far. Then, you send a second person from right to left, keeping another running tally. The final answer for any person is the product of the tallies from the person on their left and the person on their right.
+
+3. Thought Process — Natural Logic
+The "no division" constraint is the key. A simple nested loop would work but is too slow.
+
+Let's think about output[i]. It's the product of all numbers to the left of i multiplied by the product of all numbers to the right of i.
+
+output[i] = (nums[0] * ... * nums[i-1]) * (nums[i+1] * ... * nums[n-1])
+
+We can't get both products in a single pass. But we can do it in two passes!
+
+Pass 1 (Left-to-Right): Calculate the product of all numbers to the left of each element and store it in an array.
+
+Pass 2 (Right-to-Left): Now, iterate from right to left. For each element, multiply the value we already have (the product of the left side) by the product of the right side, which we can calculate on the fly.
+
+This approach gives us the answer in O(n) time and avoids division.
+
+4. Optimized Approach (Two-Pass)
+💡 Core Idea: Break the problem into two parts: a pass for left-side products and a pass for right-side products.
+
+Initialize: Create a result array output of the same size as nums, and fill it with 1s.
+
+Left Pass:
+
+Initialize a variable left_product to 1.
+
+Iterate from the start of the nums array to the end.
+
+For each index i:
+
+Set output[i] to left_product.
+
+Update left_product by multiplying it with nums[i].
+
+After this pass, output[i] contains the product of all elements to the left of i.
+
+Right Pass:
+
+Initialize a variable right_product to 1.
+
+Iterate from the end of the nums array to the start.
+
+For each index i:
+
+Multiply the current output[i] (which holds the left product) by right_product.
+
+Update right_product by multiplying it with nums[i].
+
+⏳ Time Complexity: O(n) — We make two separate passes over the array.
+
+💾 Space Complexity: O(1) — The problem statement asks for an output array, so we don't count it as extra space. We only use a few constant-space variables.
+
+5. Pseudocode (with explanation)
+Function productExceptSelf(nums):
+    n = length of nums
+    // Create an output array and fill with 1s.
+    output = array of size n, all initialized to 1
+
+    // First Pass: Calculate left-side products.
+    left_product = 1
+    For i from 0 to n - 1:
+        output[i] = left_product
+        left_product = left_product * nums[i]
+
+    // Second Pass: Calculate right-side products and combine.
+    right_product = 1
+    For i from n - 1 down to 0:
+        output[i] = output[i] * right_product
+        right_product = right_product * nums[i]
+
+    Return output
+6. Python Code (with comments)
+Python
+
+def product_except_self(nums):
+    n = len(nums)
+    # The output array is the same size as the input, initialized with 1s.
+    output = [1] * n
+
+    # --- First Pass: Calculate left products ---
+    # `left_product` will hold the product of elements to the left of the current index.
+    left_product = 1
+    for i in range(n):
+        # At index i, `output[i]` gets the product of everything to its left.
+        # For i=0, this is 1 (product of empty set).
+        output[i] = left_product
+        # Update `left_product` for the next iteration.
+        left_product *= nums[i]
+
+    # --- Second Pass: Calculate right products and combine with left products ---
+    # `right_product` will hold the product of elements to the right of the current index.
+    right_product = 1
+    # Iterate from the end of the array to the beginning.
+    for i in range(n - 1, -1, -1):
+        # Multiply `output[i]` (which has the left product) by the right product.
+        output[i] *= right_product
+        # Update `right_product` for the next iteration.
+        right_product *= nums[i]
+    
+    return output
+7. JavaScript Code (with comments)
+JavaScript
+
+function productExceptSelf(nums) {
+    const n = nums.length;
+    // Initialize the output array with 1s.
+    const output = new Array(n).fill(1);
+
+    // --- First Pass: Calculate products from the left ---
+    let leftProduct = 1;
+    for (let i = 0; i < n; i++) {
+        // `output[i]` gets the product of all elements to its left.
+        output[i] = leftProduct;
+        // Update the running product for the next iteration.
+        leftProduct *= nums[i];
+    }
+
+    // --- Second Pass: Calculate products from the right and combine ---
+    let rightProduct = 1;
+    // Iterate from the end of the array to the start.
+    for (let i = n - 1; i >= 0; i--) {
+        // Multiply the current `output[i]` (left product) by the right product.
+        output[i] *= rightProduct;
+        // Update the running product for the next iteration.
+        rightProduct *= nums[i];
+    }
+
+    return output;
+}
+8. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+output = [1] * n	Initializes the result array	"Create an empty list for the final answers."
+left_product = 1	Sets a running product for the left pass	"Start a running total. It's 1, because multiplying by 1 doesn't change anything."
+output[i] = left_product	Assigns the left product	"For this position, the answer starts as the product of everything to my left."
+left_product *= nums[i]	Updates the running product	"Now, I'll update my running total to include my own number, for the next person to use."
+right_product *= nums[i]	Updates the right product	"As I go from right to left, I'll update a second running total to include the numbers I'm passing."
+output[i] *= right_product	Multiplies left and right parts	"At each position, I'll take the 'left' product I saved and multiply it by the 'right' product I'm now carrying."
+
+Export to Sheets
+9. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(n²)	O(1)
+Optimized (Two-Pass)	O(n)	O(1)*
+Note: O(1) space if the output array is not counted as extra space, as it's required by the problem.

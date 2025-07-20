@@ -1,0 +1,171 @@
+Problem: Sliding Window Maximum
+
+You are given an array of integers nums and an integer k. There is a sliding window of size k that starts at the left edge of the array. The window slides one position to the right until it reaches the right edge of the array.
+
+Return a list that contains the maximum element in the window at each step.
+
+🧪 Example 1:
+
+Input: nums = [1,2,1,0,4,2,6], k = 3
+Output: [2,2,4,4,6]
+Explanation: Window position            Max
+---------------           ----
+[1  2  1] 0  4  2  6        2
+ 1 [2  1  0] 4  2  6        2
+ 1  2 [1  0  4] 2  6        4
+ 1  2  1 [0  4  2] 6        4
+ 1  2  1  0 [4  2  6]       6
+1. Problem Statement
+"Given an array and a window of size k, return the maximum value in the window at each step as it slides across the array."
+
+📦 Input: nums = [1,2,1,0,4,2,6], k = 3
+
+🎯 Output: [2,2,4,4,6] — Each number represents the max value of the corresponding window.
+
+2. Real-life Analogy
+Imagine you are a meteorologist tracking temperatures. You have a long list of daily high temperatures. Your task is to report the highest temperature for every k-day period as it moves across the calendar.
+
+To do this efficiently, you don't want to scan all k days every time the window moves. Instead, you could use a special data structure to keep track of the most promising temperatures in your window. As a new day's temperature comes in, you get rid of any older, colder days that are now irrelevant because the new day is warmer. This way, the warmest day is always easy to find at the front.
+
+3. Thought Process — Natural Logic
+A straightforward approach would be to iterate through the array from i = 0 to n-k, and for each i, iterate from i to i+k-1 to find the maximum. This would be O(n*k), which is too slow for larger constraints.
+
+The key to an efficient solution is to avoid re-scanning the k elements in each window. We need a way to find the maximum element quickly. This is a classic use case for a Monotonic Deque (Double-Ended Queue).
+
+A deque is a data structure that allows us to add or remove elements from both the front and the back in O(1) time. By maintaining a deque of indices with a monotonic property (in this case, storing indices in decreasing order of their corresponding values), the largest value in the current window will always be at the front of the deque.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Initialize an empty result array.
+
+Use a for loop to iterate from i = 0 to n-k.
+
+Inside, use another for loop to find the maximum in the current window, from j = i to i+k-1.
+
+Append the found maximum to the result array.
+
+⏳ Time Complexity: O(n*k)
+
+💾 Space Complexity: O(n) for the result array.
+
+5. Optimized Approach (Monotonic Deque)
+💡 Core Idea: Use a deque to store indices of elements in the current window in decreasing order of their values. The front of the deque will always hold the index of the maximum element.
+
+Logic:
+
+Initialize an empty deque (for indices) and an empty result array.
+
+Iterate through nums with an index i from 0 to n-1.
+
+Step 1 (Maintain Monotonicity): While the deque is not empty and nums[deque.back()] is less than nums[i], pop the index from the back. These old, smaller values are no longer needed because a new, larger value nums[i] has appeared.
+
+Step 2 (Add New Element): Push the current index i to the back of the deque.
+
+Step 3 (Remove Out-of-Window Elements): If the index at the front of the deque (deque.front()) is no longer in the current window (i.e., deque.front() == i - k), pop it from the front.
+
+Step 4 (Record Result): If the window has fully formed (i.e., i >= k-1), the maximum for the current window is nums[deque.front()]. Append this value to the result array.
+
+Return the result array.
+
+⏳ Time Complexity: O(n) — Each element is added to and removed from the deque at most once.
+
+💾 Space Complexity: O(k) — The deque will store at most k indices.
+
+6. Pseudocode (with explanation)
+Function maxSlidingWindow(nums, k):
+    deque = new empty deque
+    result = new empty array
+
+    For i from 0 to length of nums - 1:
+        // Step 1: Remove smaller elements from the back of the deque.
+        While deque is not empty and nums[deque.back()] <= nums[i]:
+            deque.pop_back()
+
+        // Step 2: Add the current element's index to the back.
+        deque.push_back(i)
+
+        // Step 3: Remove the element that is out of the window.
+        If deque.front() == i - k:
+            deque.pop_front()
+
+        // Step 4: If the window is valid, add the max to the result.
+        If i >= k - 1:
+            result.append(nums[deque.front()])
+
+    Return result
+7. Python Code (with comments)
+Python
+
+from collections import deque
+
+def max_sliding_window(nums, k):
+    result = []
+    # Deque to store indices
+    dq = deque()
+
+    for i, num in enumerate(nums):
+        # Step 1: Remove indices of elements smaller than the current one
+        # from the back of the deque.
+        while dq and nums[dq[-1]] <= num:
+            dq.pop()
+
+        # Step 2: Add the current index to the back.
+        dq.append(i)
+
+        # Step 3: Remove the index at the front if it's out of the current window.
+        if dq[0] == i - k:
+            dq.popleft()
+
+        # Step 4: Once the window is fully formed, record the max.
+        if i >= k - 1:
+            result.append(nums[dq[0]])
+
+    return result
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number[]}
+ */
+function maxSlidingWindow(nums, k) {
+    const result = [];
+    const deque = []; // Using an array as a deque
+
+    for (let i = 0; i < nums.length; i++) {
+        // Step 1: Remove smaller elements from the back.
+        while (deque.length > 0 && nums[deque[deque.length - 1]] <= nums[i]) {
+            deque.pop();
+        }
+
+        // Step 2: Add the current index to the back.
+        deque.push(i);
+
+        // Step 3: Remove indices that are out of the window.
+        if (deque[0] === i - k) {
+            deque.shift();
+        }
+
+        // Step 4: Record the maximum for the current window.
+        if (i >= k - 1) {
+            result.push(nums[deque[0]]);
+        }
+    }
+
+    return result;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+while dq and nums[...	Maintains monotonicity	"Look at the numbers I've considered so far. If the new number is bigger than any of them, those smaller numbers are now useless, so I'll get rid of them."
+dq.append(i)	Adds new element	"I'll add the new number's position to my list of important numbers."
+if dq[0] == i-k	Removes old elements	"Is the number at the very front of my list too old (outside the window)? If so, I'll discard it."
+result.append(...)	Records the maximum	"My current window is full. The very first number in my list is the biggest one. I'll write it down as my answer."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(n*k)	O(n)
+Optimized (Monotonic Deque)	O(n)	O(k)
+Note: n=len(nums), k is the window size.

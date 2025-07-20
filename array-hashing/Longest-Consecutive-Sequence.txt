@@ -1,0 +1,196 @@
+Problem: Longest Consecutive Sequence
+
+Given an array of integers nums, return the length of the longest consecutive sequence of elements that can be formed.
+
+A consecutive sequence is a sequence of elements in which each element is exactly 1 greater than the previous element. The elements do not have to be consecutive in the original array.
+
+You must write an algorithm that runs in O(n) time.
+
+🧪 Example 1:
+
+Input: nums = [2,20,4,10,3,4,5]
+Output: 4
+Explanation: The longest consecutive sequence is [2, 3, 4, 5].
+1. Problem Statement
+"Given an array of integers nums, return the length of the longest consecutive sequence of elements that can be formed. You must write an algorithm that runs in O(n) time."
+
+📦 Input: nums = [2,20,4,10,3,4,5]
+
+🎯 Output: 4 — The numbers [2, 3, 4, 5] form a consecutive sequence of length 4.
+
+2. Real-life Analogy
+Imagine you have a box full of disconnected puzzle pieces, and each piece has a number on it. You want to find the longest chain of pieces where each piece's number is one greater than the last (e.g., 5, 6, 7). The pieces are scattered randomly, so you can't just pick them up in order.
+
+To solve this efficiently, you would first spread all the pieces out on the table so you can instantly see if a piece exists. Then, for each piece, you'd check if a piece with a number 1 less than it is present. If it's not, you know you have found a potential starting point for a new chain. From there, you start building the chain by looking for pieces +1 from the current one, counting as you go. You keep doing this until you can't find the next piece. You then compare the length of this chain to the longest one you've found so far.
+
+3. Thought Process — Natural Logic
+The first thought for this problem is often to sort the array. If the array is sorted, you can easily find consecutive sequences by just iterating through it once.
+
+[2,20,4,10,3,4,5] sorted becomes [2,3,4,4,5,10,20].
+
+Then you can go through and find 2, 3, 4, 5.
+
+However, the problem explicitly states a time complexity of O(n), and sorting an array takes O(n log n). We need a different approach.
+
+The key to an O(n) solution is a data structure that allows for fast lookups. A Hash Set (or a Set in JavaScript) is perfect for this, as it allows you to check for the existence of an element in O(1) average time.
+
+4. Less Optimized Approach (Sorting)
+Logic:
+
+Sort the input array nums.
+
+Iterate through the sorted array.
+
+Keep a current_length and a max_length.
+
+If the current number is 1 greater than the previous, increment current_length.
+
+If it's a duplicate, do nothing.
+
+If it's not consecutive, reset current_length to 1.
+
+Update max_length after each step.
+
+⏳ Time Complexity: O(n log n) due to sorting.
+
+💾 Space Complexity: O(1) or O(n) depending on the sorting algorithm.
+
+5. Optimized Approach (Using a Hash Set)
+💡 Core Idea: Put all numbers into a hash set for fast lookups, and then cleverly find the start of each sequence to avoid redundant checks.
+
+Logic:
+
+Place all numbers from nums into a hash set (num_set).
+
+Initialize longest_sequence to 0.
+
+Iterate through each number num in the original nums array.
+
+Before starting a new count for a sequence, check if num - 1 is in the num_set.
+
+If num - 1 exists, it means num is part of a sequence that started earlier. We can skip this number and let the starting number handle the count for the whole sequence. This is the crucial step that ensures an O(n) solution.
+
+If num - 1 does not exist, then num is the starting point of a new consecutive sequence.
+
+Initialize a current_length to 1.
+
+Start a loop to check for num + 1, num + 2, etc.
+
+As long as the next number exists in num_set, increment current_length and continue.
+
+After the loop, update longest_sequence = max(longest_sequence, current_length).
+
+⏳ Time Complexity: O(n) — We iterate through the array once to build the set, and then iterate through it again. The inner while loop seems like it could make it O(n²), but it's not. Each number is visited by the outer loop once, and the inner loop only visits each number at most once across the entire run. For example, once we've visited 3 from the [2,3,4,5] sequence, we never visit it again with the inner loop.
+
+💾 Space Complexity: O(n) — We use a hash set to store all the numbers.
+
+6. Pseudocode (with explanation)
+Function longestConsecutive(nums):
+    // Handle the edge case of an empty array.
+    If nums is empty:
+        Return 0
+
+    // Step 1: Put all numbers into a set for O(1) lookups.
+    num_set = new set from nums array
+
+    longest_sequence = 0
+
+    // Step 2: Iterate through the original numbers.
+    For each num in nums:
+        // Step 3: Check if this is the start of a sequence.
+        // If num-1 exists, this is not the start of the sequence, so we skip it.
+        If num-1 is not in num_set:
+            current_num = num
+            current_length = 1
+
+            // Step 4: Keep checking for the next consecutive number.
+            While current_num + 1 is in num_set:
+                current_num = current_num + 1
+                current_length = current_length + 1
+            
+            // Step 5: Update the longest sequence found so far.
+            longest_sequence = max(longest_sequence, current_length)
+
+    Return longest_sequence
+7. Python Code (with comments)
+Python
+
+def longest_consecutive(nums):
+    # Handle edge case: empty list.
+    if not nums:
+        return 0
+
+    # Step 1: Convert the list to a set for O(1) lookups.
+    num_set = set(nums)
+    longest_sequence = 0
+
+    # Step 2: Iterate through each number in the original list.
+    for num in nums:
+        # Step 3: Check if this is the start of a sequence.
+        # A number is a potential start if num-1 is NOT in the set.
+        if (num - 1) not in num_set:
+            current_num = num
+            current_length = 1
+
+            # Step 4: Count the length of the consecutive sequence.
+            # Keep checking for the next number in the sequence.
+            while (current_num + 1) in num_set:
+                current_num += 1
+                current_length += 1
+            
+            # Step 5: Update the longest sequence found.
+            longest_sequence = max(longest_sequence, current_length)
+    
+    return longest_sequence
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+function longestConsecutive(nums) {
+    // Handle edge case: empty array.
+    if (nums.length === 0) {
+        return 0;
+    }
+
+    // Step 1: Create a Set for O(1) average time lookups.
+    const numSet = new Set(nums);
+    let longestSequence = 0;
+
+    // Step 2: Iterate through each number.
+    for (const num of numSet) {
+        // Step 3: Check if this is a starting number of a sequence.
+        // A number `n` is a start if `n - 1` does not exist in the set.
+        if (!numSet.has(num - 1)) {
+            let currentNum = num;
+            let currentLength = 1;
+
+            // Step 4: Count the length of the sequence.
+            // Check for the next consecutive number.
+            while (numSet.has(currentNum + 1)) {
+                currentNum++;
+                currentLength++;
+            }
+            
+            // Step 5: Update the longest sequence found.
+            longestSequence = Math.max(longestSequence, currentLength);
+        }
+    }
+    
+    return longestSequence;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+num_set = set(nums)	Creates a set for numbers	"Lay out all the puzzle pieces on the table so I can easily see if one exists."
+if (num - 1) not in num_set	Checks for the sequence start	"Is this piece 1? Or is there a piece 0 to start a chain from?"
+while (current_num + 1) in num_set	Builds the sequence	"I've found a starting piece! Now, does 2 exist? Does 3 exist? Does 4...?"
+current_length += 1	Counts the length	"I found a piece, so I'll add one to my current count."
+longest_sequence = max(...)	Updates the longest count	"This was a chain of 4 pieces. Is that longer than the best I've found so far?"
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Less Optimized (Sort)	O(n log n)	O(1) or O(n)
+Optimized (Hash Set)	O(n)	O(n)

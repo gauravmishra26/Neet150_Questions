@@ -1,0 +1,170 @@
+Problem: Contains Duplicate
+
+Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.
+
+🧪 Example 1:
+
+Input: nums = [1,2,3,1]
+Output: true
+Explanation: The element 1 occurs at the indices 0 and 3.
+1. Problem Statement
+"Determine if any element in an array appears more than once."
+
+📦 Input: nums = [1,2,3,1]
+
+🎯 Output: true — The number 1 is a duplicate.
+
+2. Real-life Analogy
+Imagine you're at the entrance of an exclusive club, and your job is to make sure no one on a list of names is trying to enter a second time. You can use a clipboard to keep track of the names of everyone who has already entered.
+
+As each new person arrives, you check their name against your clipboard. If their name is already on the clipboard, you've found a duplicate and can send them away. If their name is not on the clipboard, you add it and let them in. If you finish the entire line without ever finding a name already on your clipboard, you know everyone is unique.
+
+3. Thought Process — Natural Logic
+The most intuitive way to solve this is to keep a record of the elements you have already seen. When you encounter a new element, you check if it's already in your record.
+
+The Brute-Force way:
+
+Use a nested loop. The outer loop iterates through each element i.
+
+The inner loop iterates through all subsequent elements j > i.
+
+If nums[i] == nums[j], you've found a duplicate. Return true.
+
+This is simple but inefficient.
+
+The Efficient Way (using a Hash Set):
+
+A hash set is a data structure that provides very fast (O(1) on average) lookups, insertions, and deletions.
+
+We can iterate through the array just once.
+
+For each element, we check if it's already in our hash set.
+
+If it is, we have a duplicate and can return true.
+
+If it's not, we add it to the set to record that we've seen it.
+
+If we get to the end of the array without finding any duplicates, we return false.
+
+Alternative Approach (Sorting):
+
+You could also sort the array first.
+
+After sorting, any duplicate elements would be right next to each other.
+
+A single pass through the sorted array, checking if nums[i] == nums[i+1], would find any duplicates.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Use a nested for loop to compare every element with every other element.
+
+The outer loop goes from i = 0 to n-1.
+
+The inner loop goes from j = i + 1 to n-1.
+
+If nums[i] == nums[j], a duplicate is found.
+
+⏳ Time Complexity: O(n²)
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Hash Set)
+💡 Core Idea: Use a hash set to store elements as you iterate, providing constant-time average lookups.
+
+Logic:
+
+Initialize an empty hash set, let's call it seen.
+
+Iterate through each num in the input array nums.
+
+For each num, check if it's already in seen.
+
+If num is in seen, a duplicate exists. Return true.
+
+If num is not in seen, add num to seen.
+
+If the loop completes without returning, it means no duplicates were found. Return false.
+
+⏳ Time Complexity: O(n) — We iterate through the array once. Each hash set operation (in and add) takes, on average, O(1) time.
+
+💾 Space Complexity: O(n) — In the worst case (all elements are unique), the hash set will store all n elements.
+
+6. Pseudocode (with explanation)
+Function containsDuplicate(nums):
+    seen = new empty HashSet
+
+    For each number in nums:
+        If number is in seen:
+            Return true
+        Else:
+            add number to seen
+    
+    Return false
+7. Python Code (with comments)
+Python
+
+def contains_duplicate(nums):
+    # A set is a hash-based data structure, providing O(1) average time complexity
+    # for add and lookup operations.
+    seen = set()
+    
+    for num in nums:
+        if num in seen:
+            # We have seen this number before.
+            return True
+        seen.add(num)
+        
+    # If the loop finishes, no duplicates were found.
+    return False
+
+# A more concise way in Python:
+def contains_duplicate_pythonic(nums):
+    # If the number of unique elements is not equal to the total number of elements,
+    # there must be duplicates.
+    return len(set(nums)) != len(nums)
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} nums
+ * @return {boolean}
+ */
+function containsDuplicate(nums) {
+    // A Set stores unique values.
+    const seen = new Set();
+    
+    for (const num of nums) {
+        if (seen.has(num)) {
+            // Found a duplicate.
+            return true;
+        }
+        seen.add(num);
+    }
+    
+    // No duplicates found.
+    return false;
+}
+
+// A more concise way in JavaScript:
+function containsDuplicateConcise(nums) {
+    // The size of a new Set created from the array will be less than
+    // the array's length if there are duplicates.
+    return new Set(nums).size !== nums.length;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+seen = set()	Initializes the data structure	"I'll get a new 'clipboard' to keep track of the numbers I've seen."
+for num in nums	Iterates through the input	"I'll look at each number in the list, one by one."
+if num in seen	Checks for a duplicate	"Have I already written this number on my clipboard?"
+return true	Found a duplicate	"Yes! I found a duplicate, so I'm done. I'll return true."
+seen.add(num)	Adds a new number	"No, I haven't seen this number. I'll write it down now."
+return false	No duplicates	"I looked at all the numbers and never found a duplicate. I'll return false."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(n²)	O(1)
+Optimized (Hash Set)	O(n)	O(n)
+Sorting and Scanning	O(n log n)	O(1) or O(n)
+Note: n is the number of elements in nums.	

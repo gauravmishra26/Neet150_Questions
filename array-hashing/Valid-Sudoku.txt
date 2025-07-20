@@ -1,0 +1,212 @@
+Problem: Valid Sudoku
+
+You are given a 9 x 9 Sudoku board board. A Sudoku board is valid if the following rules are followed:
+
+Each row must contain the digits 1-9 without duplicates.
+
+Each column must contain the digits 1-9 without duplicates.
+
+Each of the nine 3 x 3 sub-boxes of the grid must contain the digits 1-9 without duplicates.
+
+Return true if the Sudoku board is valid, otherwise return false.
+
+Note: A board does not need to be full or be solvable to be valid.
+
+🧪 Example 1:
+
+Input: board = 
+[["1","2",".",".","3",".",".",".","."],
+ ["4",".",".","5",".",".",".",".","."],
+ [".","9","8",".",".",".",".",".","3"],
+ ["5",".",".",".","6",".",".",".","4"],
+ ["."...] (truncated for brevity)
+Output: true
+1. Problem Statement
+"You are given a 9 x 9 Sudoku board. Return true if the board is valid, otherwise return false. A valid board follows three rules: unique digits (1-9) in each row, each column, and each 3x3 sub-box."
+
+📦 Input: A 9x9 grid of digits and . characters.
+
+🎯 Output: true or false based on the validation rules.
+
+2. Real-life Analogy
+Imagine you are a quality control inspector for a Sudoku factory. Your job is to check if a board is properly made, even if it's incomplete. You need to verify three independent rules for the entire board at the same time:
+
+Row Rule: You check each row, one at a time. As you go down a row, you note down the numbers you see. If you see a number you've already noted down for that row, you immediately fail the board.
+
+Column Rule: You do the same for each column. As you go down a column, you note the numbers, and if you see a duplicate, you fail.
+
+Box Rule: You also check each of the nine 3x3 boxes. For each box, you check for duplicate numbers.
+
+The board is only valid if it passes all three checks simultaneously.
+
+3. Thought Process — Natural Logic
+The problem requires us to check for duplicate numbers within three distinct groups:
+
+9 rows
+
+9 columns
+
+9 sub-boxes
+
+A number is only considered a duplicate if it appears more than once in the same group. This is a perfect use case for a Hash Set, which can efficiently check for the existence of an item.
+
+A simple approach would be to iterate through the board and, for each cell, check its row, column, and sub-box for duplicates. However, this would involve a lot of redundant work. A more elegant and efficient solution is to make a single pass over the board and keep track of the numbers seen in each of the three types of groups.
+
+4. Optimized Approach (One-Pass with Hash Sets)
+💡 Core Idea: Use three collections of hash sets to track the numbers we encounter in each row, column, and sub-box in a single pass.
+
+Data Structures:
+
+row_sets: An array of 9 empty sets, one for each row.
+
+col_sets: An array of 9 empty sets, one for each column.
+
+box_sets: An array of 9 empty sets, one for each 3x3 sub-box.
+
+Box Indexing: The key is how to map a (row, col) coordinate to a single box index from 0 to 8. The formula box_index = (row // 3) * 3 + (col // 3) works perfectly for a 9x9 grid.
+
+Logic:
+
+Initialize the three arrays of sets.
+
+Iterate through the board with nested loops for row and col from 0 to 8.
+
+For each cell board[row][col]:
+
+If the cell contains a . (period), skip it.
+
+Get the number num from the cell.
+
+Calculate the box_index using the formula.
+
+Check for duplicates: if num is already in row_sets[row], col_sets[col], or box_sets[box_index], return false.
+
+If no duplicates are found, add num to all three sets: row_sets[row], col_sets[col], and box_sets[box_index].
+
+If the loop completes without finding any duplicates, return true.
+
+⏳ Time Complexity: O(1)
+
+Since the board size is fixed at 9x9, the number of operations is constant. We visit each of the 81 cells once.
+
+💾 Space Complexity: O(1)
+
+The number of hash sets (3 x 9 = 27) and the maximum size of each set (at most 9 unique numbers) are constant. The memory usage does not scale with the input size.
+
+5. Pseudocode (with explanation)
+Function isValidSudoku(board):
+    // Initialize three lists of sets, one for each validation type.
+    rows = list of 9 empty sets
+    columns = list of 9 empty sets
+    boxes = list of 9 empty sets
+
+    // Iterate through the board row by row and column by column.
+    For row from 0 to 8:
+        For col from 0 to 8:
+            num = board[row][col]
+
+            // Skip empty cells.
+            If num is not ".":
+                // Calculate the box index.
+                box_index = (row / 3) * 3 + (col / 3)
+
+                // Check for duplicates in the current row, column, and box sets.
+                If num is in rows[row] or num is in columns[col] or num is in boxes[box_index]:
+                    Return False
+                
+                // If no duplicates, add the number to all three sets.
+                Add num to rows[row]
+                Add num to columns[col]
+                Add num to boxes[box_index]
+
+    Return True
+6. Python Code (with comments)
+Python
+
+from collections import defaultdict
+
+def is_valid_sudoku(board):
+    # Using defaultdict simplifies adding new sets as needed.
+    # The key will be the row/col/box index, and the value is a new set.
+    rows = defaultdict(set)
+    cols = defaultdict(set)
+    boxes = defaultdict(set) # key = (row // 3, col // 3)
+
+    # Iterate through the 9x9 board.
+    for r in range(9):
+        for c in range(9):
+            num = board[r][c]
+
+            # If the cell is not empty, check for duplicates.
+            if num != ".":
+                # Calculate the unique box key for the current cell.
+                box_key = (r // 3, c // 3)
+
+                # Check if the number has already been seen in this row, column, or box.
+                if num in rows[r] or num in cols[c] or num in boxes[box_key]:
+                    return False
+                
+                # If not, add the number to the respective sets.
+                rows[r].add(num)
+                cols[c].add(num)
+                boxes[box_key].add(num)
+    
+    # If the loops complete without finding any duplicates, the board is valid.
+    return True
+7. JavaScript Code (with comments)
+JavaScript
+
+function isValidSudoku(board) {
+    // We'll use three Maps to store sets for rows, columns, and boxes.
+    // Each Map key will be an index, and the value will be a Set of numbers.
+    const rows = new Map();
+    const cols = new Map();
+    const boxes = new Map();
+
+    // Iterate through the board.
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            const num = board[r][c];
+
+            // If the cell is empty, skip to the next cell.
+            if (num === '.') {
+                continue;
+            }
+
+            // A unique key for each 3x3 box.
+            const boxKey = `${Math.floor(r / 3)}-${Math.floor(c / 3)}`;
+
+            // Initialize sets for the current row, col, and box if they don't exist.
+            if (!rows.has(r)) rows.set(r, new Set());
+            if (!cols.has(c)) cols.set(c, new Set());
+            if (!boxes.has(boxKey)) boxes.set(boxKey, new Set());
+
+            // Check if the number is already present in any of the three sets.
+            if (rows.get(r).has(num) || cols.get(c).has(num) || boxes.get(boxKey).has(num)) {
+                return false;
+            }
+
+            // If it's a new number, add it to all three sets.
+            rows.get(r).add(num);
+            cols.get(c).add(num);
+            boxes.get(boxKey).add(num);
+        }
+    }
+
+    // If we've checked the whole board without finding any duplicates, it's valid.
+    return true;
+}
+8. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+rows = defaultdict(set)	Creates a collection of sets for rows	"A notebook with 9 pages, one for each row, to track numbers I've seen in that row."
+box_key = (r // 3, c // 3)	Identifies which 3x3 box a cell belongs to	"This cell is in the top-left box, so I'll write in that box's notebook page."
+if num in ...	Checks for duplicates in three sets	"Have I already seen this number in this row? This column? This box?"
+...add(num)	Adds the number to all sets	"I haven't seen this number yet, so I'll write it down in the notebook pages for this row, column, and box."
+return True	All checks passed	"I've checked the whole board and found no rule violations."
+
+Export to Sheets
+9. Summary
+Method	Time	Space
+Brute Force (Helper Functions)	O(1)	O(1)
+Optimized (One-Pass)	O(1)	O(1)
+Note: O(1) for both since the board size is fixed at 9x9.	

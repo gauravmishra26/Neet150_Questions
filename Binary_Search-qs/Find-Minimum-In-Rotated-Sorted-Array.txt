@@ -1,0 +1,185 @@
+Problem: Find Minimum in Rotated Sorted Array
+
+You are given an array of length n which was originally sorted in ascending order. It has now been rotated between 1 and n times.
+
+Assuming all elements in the rotated sorted array nums are unique, return the minimum element of this array.
+
+A solution that runs in O(n) time is trivial, can you write an algorithm that runs in O(log n) time?
+
+🧪 Example 1:
+
+Input: nums = [3,4,5,6,1,2]
+Output: 1
+1. Problem Statement
+"Find the minimum element in a sorted array that has been rotated at an unknown pivot point. The solution must be logarithmic, O(log n)."
+
+📦 Input: nums = [3,4,5,6,1,2]
+
+🎯 Output: 1 — The minimum value in the array.
+
+2. Real-life Analogy
+Imagine a group of people lined up by height, from shortest to tallest. Then, a section of the line is moved from the back to the front. The line is no longer perfectly sorted. The shortest person, who was at the beginning, is now somewhere in the middle.
+
+The key observation is that the line is now composed of two sorted segments. The person we are looking for (the shortest) is the first person in the second segment. We need a way to efficiently find that "break" in the line.
+
+3. Thought Process — Natural Logic
+The O(log n) time complexity requirement immediately suggests a Binary Search approach. The challenge is adapting binary search for a partially sorted array.
+
+The array is not completely random; it consists of two sorted parts. The minimum element is the unique element that is smaller than its predecessor (or the first element of the entire array if it's not rotated). This element is the "pivot" point of the rotation.
+
+We can use binary search to home in on this pivot point.
+
+We'll use left and right pointers to define our search space.
+
+At the middle element mid, we can determine which of the two sorted segments mid falls into by comparing it to an edge element, for example, nums[right].
+
+Let's consider the comparison nums[mid] vs nums[right]:
+
+Case 1: nums[mid] > nums[right]
+
+This means the mid element is in the left, larger sorted subarray (e.g., 5 in [3,4,5,6,1,2]).
+
+The minimum element must be in the right subarray, which contains the "break" point.
+
+We can discard the left half and move our left pointer to mid + 1.
+
+Case 2: nums[mid] < nums[right]
+
+This means the mid element is in the right, smaller sorted subarray (e.g., 1 or 2 in [3,4,5,6,1,2]).
+
+The minimum element could be nums[mid] itself, or it could be somewhere to its left. We can't discard mid yet.
+
+We discard the right half by moving our right pointer to mid.
+
+The loop continues until left and right converge on the same element, which will be the minimum.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Iterate through the array from the first element to the last.
+
+Keep a variable, min_val, initialized to the first element.
+
+In each step, compare min_val with the current element and update min_val if the current element is smaller.
+
+Return min_val.
+
+⏳ Time Complexity: O(n)
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Binary Search)
+💡 Core Idea: Use binary search to find the "pivot" point where the sorted array was rotated. This pivot point is the minimum element.
+
+Logic:
+
+Initialize left = 0 and right = n - 1.
+
+Handle the edge case where the array is not rotated: If nums[0] < nums[n-1], the array is sorted, so return nums[0].
+
+Start a loop that continues as long as left < right.
+
+Calculate mid = left + (right - left) // 2.
+
+If nums[mid] > nums[right]: The minimum element is in the right half. Update left = mid + 1.
+
+If nums[mid] < nums[right]: The minimum element is in the left half (including mid). Update right = mid.
+
+When the loop terminates, left and right will be the same index, pointing to the minimum element. Return nums[left].
+
+⏳ Time Complexity: O(log n)
+
+💾 Space Complexity: O(1)
+
+6. Pseudocode (with explanation)
+Function findMin(nums):
+    left = 0
+    right = length of nums - 1
+
+    // If array is not rotated, the first element is the minimum.
+    If nums[left] < nums[right]:
+        Return nums[left]
+
+    While left < right:
+        mid = left + (right - left) // 2
+        
+        If nums[mid] > nums[right]:
+            // The minimum must be in the right half of the array.
+            left = mid + 1
+        Else:
+            // The minimum is either mid or in the left half.
+            right = mid
+            
+    Return nums[left]
+7. Python Code (with comments)
+Python
+
+def find_min(nums):
+    left, right = 0, len(nums) - 1
+
+    # If the array is not rotated, the first element is the minimum.
+    if nums[left] < nums[right]:
+        return nums[left]
+
+    while left < right:
+        mid = left + (right - left) // 2
+
+        # If the middle element is greater than the rightmost element,
+        # it means the minimum is in the right subarray.
+        if nums[mid] > nums[right]:
+            left = mid + 1
+        else:
+            # The middle element is smaller than the rightmost.
+            # This means the minimum is in the left subarray (including mid).
+            right = mid
+
+    # When left and right converge, we have found the minimum.
+    return nums[left]
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+function findMin(nums) {
+    let left = 0;
+    let right = nums.length - 1;
+
+    // If the array is not rotated, the first element is the minimum.
+    if (nums[left] < nums[right]) {
+        return nums[left];
+    }
+
+    while (left < right) {
+        const mid = Math.floor(left + (right - left) / 2);
+
+        // If the middle element is greater than the rightmost element,
+        // it means the minimum is in the right subarray.
+        if (nums[mid] > nums[right]) {
+            left = mid + 1;
+        } else {
+            // The middle element is smaller than the rightmost.
+            // This means the minimum is in the left subarray (including mid).
+            right = mid;
+        }
+    }
+
+    // When the loop ends, left === right, and this is the minimum.
+    return nums[left];
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+if nums[left] < ...	Edge case check	"If the array isn't rotated, I'll just return the first element. Easy."
+while left < right	Binary search loop	"I'll keep narrowing down the search space until I've found the single element that's the minimum."
+mid = ...	Finds the middle	"I'll check the middle of my current search space."
+if nums[mid] > nums[right]	Discards left half	"The middle number is bigger than the last number I'm looking at. The break must be somewhere in the right half, so I'll discard the left."
+else (nums[mid] < ...)	Discards right half	"The middle number is smaller than the last number. The break must be here or somewhere to the left, so I'll discard the right half."
+return nums[left]	Final result	"I've found the spot where the break happened. That element must be the minimum!"
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Linear Scan)	O(n)	O(1)
+Optimized (Binary Search)	O(log n)	O(1)
+Note: n is the number of elements in nums.		

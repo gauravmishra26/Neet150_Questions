@@ -1,0 +1,183 @@
+Problem: Valid Anagram
+
+Given two strings s and t, return true if the two strings are anagrams of each other, otherwise return false.
+
+An anagram is a string that contains the exact same characters as another string, but the order of the characters can be different.
+
+🧪 Example:
+
+Input: s = "racecar", t = "carrace"
+Output: true
+1. Problem Statement
+"Given two strings s and t, return true if the two strings are anagrams of each other, otherwise return false."
+
+📦 Input: s = "racecar", t = "carrace"
+
+🎯 Output: true — because s and t have the same letters with the same counts.
+
+2. Real-life Analogy
+Imagine you have two bags of Scrabble tiles, one for each word.
+
+For s = "racecar", you put the tiles r, a, c, e, c, a, r into one bag.
+
+For t = "carrace", you put the tiles c, a, r, r, a, c, e into the other bag.
+
+To find out if they are anagrams, you just need to check if the contents of the two bags are identical. You don't care about the order you put them in; you just care that you have the same number of each letter (2 'r's, 2 'a's, 2 'c's, and 1 'e'). If both bags have the exact same set of tiles, they are anagrams.
+
+3. Thought Process — Natural Logic
+Before code, ask yourself: what is the fundamental property of an anagram?
+
+The characters must be the same.
+
+The count of each character must also be the same.
+
+The order of the characters does not matter.
+
+This means we need a way to count the occurrences of each character in both strings and then compare the counts.
+
+4. Brute-Force Approach (Sorting)
+The simplest way to satisfy the "same characters, same counts" rule is to make the order of characters the same.
+
+Logic: Sort both strings alphabetically. If they are anagrams, they will be identical after sorting.
+
+s = "racecar" becomes "aaccerr" after sorting.
+
+t = "carrace" becomes "aaccerr" after sorting.
+
+Since the sorted strings are equal, they are anagrams.
+
+Conditions: First, a quick check: if the lengths of the two strings are different, they cannot be anagrams.
+
+⏳ Time Complexity: O(n log n) — dominated by the time it takes to sort the strings. n is the length of the strings.
+
+💾 Space Complexity: O(n) or O(log n) — depends on the sorting algorithm used. Most built-in sorts require some extra space.
+
+5. Optimized Approach (Using a Hash Map)
+💡 Core Idea: Use a hash map (or a frequency array) to count the characters in both strings.
+
+First, check if the lengths of s and t are different. If so, return false immediately.
+
+Create an empty hash map (let's call it counts).
+
+Iterate through the first string, s. For each character, increment its count in the counts map.
+
+Iterate through the second string, t. For each character, decrement its count in the counts map.
+
+Finally, iterate through the counts map. If any character count is not zero, it means the character frequencies did not match between the two strings. Return false.
+
+If all counts are zero, return true.
+
+⏳ Time Complexity: O(n) — We make two passes through the strings and one pass through the hash map, all of which are proportional to the length of the string.
+
+💾 Space Complexity: O(1) — Since the strings only contain lowercase English letters, the hash map will only store up to 26 key-value pairs. This is a constant amount of space, not dependent on the input string size n.
+
+6. Pseudocode (with explanation)
+Function isAnagram(s, t):
+    // Check if the lengths are different first.
+    If length of s is not equal to length of t:
+        Return False
+
+    // Create a hash map to store character counts.
+    Create an empty hash map called char_counts
+
+    // Count characters in the first string (s).
+    For each character in s:
+        Increment the count for that character in char_counts
+
+    // Decrement counts based on the second string (t).
+    For each character in t:
+        Decrement the count for that character in char_counts
+
+    // Check if all counts in the map are zero.
+    For each count in the values of char_counts:
+        If count is not 0:
+            Return False
+
+    // If all counts are zero, they are anagrams.
+    Return True
+7. Python Code (with comments)
+Python
+
+from collections import Counter
+
+def is_anagram(s, t):
+    # Anagrams must have the same length. This is a quick check.
+    if len(s) != len(t):
+        return False
+
+    # The most Pythonic way is to use a Counter, which is a specialized dictionary.
+    # It counts the frequency of each item.
+    # This single line of code handles the counting for both strings and the comparison.
+    return Counter(s) == Counter(t)
+
+# --- Alternative O(n) approach using a simple dictionary ---
+def is_anagram_manual(s, t):
+    if len(s) != len(t):
+        return False
+
+    counts = {}  # Using a dictionary as a hash map
+
+    # First pass: count characters in string s
+    for char in s:
+        counts[char] = counts.get(char, 0) + 1
+
+    # Second pass: decrement counts based on string t
+    for char in t:
+        if char not in counts:
+            # If t has a character that wasn't in s, it can't be an anagram
+            return False
+        counts[char] -= 1
+
+    # Final check: all counts should be zero
+    for count in counts.values():
+        if count != 0:
+            return False
+
+    return True
+8. JavaScript Code (with comments)
+JavaScript
+
+function isAnagram(s, t) {
+    // Step 1: Check if the lengths are different.
+    if (s.length !== t.length) {
+        return false;
+    }
+
+    // Step 2: Create a map to store character counts.
+    const charCounts = new Map();
+
+    // Step 3: Count characters from string s.
+    for (const char of s) {
+        // If the character is not in the map, set its count to 1.
+        // Otherwise, increment its current count.
+        charCounts.set(char, (charCounts.get(char) || 0) + 1);
+    }
+
+    // Step 4: Decrement counts for characters from string t.
+    for (const char of t) {
+        // If a character from t is not in the map or its count is already 0,
+        // it means s and t do not have the same characters/counts.
+        if (!charCounts.has(char) || charCounts.get(char) === 0) {
+            return false;
+        }
+        charCounts.set(char, charCounts.get(char) - 1);
+    }
+
+    // Step 5: If we get here, all characters from t were found and decremented.
+    // The map is now effectively all zeros.
+    return true;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+len(s) != len(t)	Checks if strings have the same length	"Do the two bags have the same number of tiles?"
+counts = {} / new Map()	Creates a memory space to count items	"A notebook to write down how many of each letter I see."
+counts[char] += 1	Increments a character's count	"I see a c, so I'll add a tally mark for c."
+counts[char] -= 1	Decrements a character's count	"I see another c in the second word, so I'll cross off a tally mark for c."
+count != 0	Checks if any count is non-zero	"After crossing off tallies for the second word, are all the tallies gone?"
+return True	All counts are zero	"Yes, the two bags contain the exact same tiles."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Sort)	O(n log n)	O(n)
+Optimized (Hash Map)	O(n)	O(1)

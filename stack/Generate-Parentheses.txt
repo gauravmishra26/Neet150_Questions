@@ -1,0 +1,167 @@
+Problem: Generate Parentheses
+
+You are given an integer n. Return all well-formed parentheses strings that you can generate with n pairs of parentheses.
+
+You may return the answer in any order.
+
+🧪 Example 1:
+
+Input: n = 3
+Output: ["((()))","(()())","(())()","()(())","()()()"]
+1. Problem Statement
+"Given a number n, generate all possible combinations of n pairs of parentheses that are correctly matched and nested."
+
+📦 Input: n = 3
+
+🎯 Output: ["((()))", "(()())", "(())()", "()(())", "()()()"]
+
+2. Real-life Analogy
+Imagine you have a set of n opening parentheses and n closing parentheses, and you are trying to arrange them to form a valid sequence. A valid sequence is one where at no point do you have more closing than opening parentheses.
+
+This is like a dance. Every time you open your arms (, you must eventually close them ). But you can't close your arms if they are already closed. And you can only perform n such arm-opening and n such arm-closing moves in total. The goal is to find all the different valid dances you can perform.
+
+This type of generation problem, where you build a solution step-by-step and have to backtrack when a path is invalid, is a classic use case for Recursion and Backtracking.
+
+3. Thought Process — Natural Logic
+We need to build a string of length 2 * n, character by character. At each step, we have two choices: add an opening bracket ( or a closing bracket ). The key is to avoid building invalid strings.
+
+To do this, we need to keep track of two things as we build the string:
+
+The number of opening brackets we have used so far.
+
+The number of closing brackets we have used so far.
+
+Based on these counts, we can define our rules for what can be added next:
+
+Rule 1: We can add an opening bracket ( as long as we haven't used all n of them yet. (open_count < n)
+
+Rule 2: We can add a closing bracket ) as long as the number of closing brackets used is strictly less than the number of opening brackets used. This ensures that every closing bracket has a matching open one. (closed_count < open_count)
+
+When we reach a state where the string has a length of 2 * n, we know we've used all n pairs, and if we followed the rules, the string must be valid. We add it to our result list.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Generate all possible strings of length 2 * n consisting of ( and ). This is a total of 2^(2n) combinations.
+
+For each generated string, iterate through it to check if it's a valid parentheses string. (e.g., using a stack, as in the "Valid Parentheses" problem).
+
+If the string is valid, add it to the result list.
+
+⏳ Time Complexity: O(2^(2n) * n). This is extremely slow. For n=3, 2^6 = 64 combinations. For n=7, 2^14 = 16,384 combinations.
+
+💾 Space Complexity: O(n) for the generated strings.
+
+5. Optimized Approach (Backtracking / Recursion)
+💡 Core Idea: Use a recursive function to build the strings incrementally. Prune branches that are guaranteed to be invalid based on the rules.
+
+Logic:
+
+Create a result list to store the valid strings.
+
+Define a recursive helper function, let's call it backtrack(current_string, open_count, closed_count).
+
+Base Case: If open_count == n and closed_count == n, it means we have successfully built a valid string. Add current_string to the result list and return.
+
+Recursive Step 1 (Add '('): If open_count < n, recursively call backtrack(current_string + '(', open_count + 1, closed_count).
+
+Recursive Step 2 (Add ')'): If closed_count < open_count, recursively call backtrack(current_string + ')', open_count, closed_count + 1).
+
+⏳ Time Complexity: The number of valid parenthesis strings is given by the n-th Catalan number, which is approximately 4^n / (n^(3/2) * sqrt(π)). The time complexity of this algorithm is proportional to the number of valid combinations, which is roughly O(4^n / n^(1.5)).
+
+💾 Space Complexity: O(n) for the recursion call stack, as the maximum depth of the recursion is 2*n.
+
+6. Pseudocode (with explanation)
+Function generateParenthesis(n):
+    result = new empty list
+
+    // Start the backtracking process
+    backtrack(result, "", 0, 0, n)
+
+    Return result
+
+Function backtrack(result, current_string, open_count, closed_count, max_n):
+    // Base Case: We've used all n pairs.
+    If length of current_string == 2 * max_n:
+        result.append(current_string)
+        Return
+
+    // Add an opening bracket if we still have some available.
+    If open_count < max_n:
+        backtrack(result, current_string + "(", open_count + 1, closed_count, max_n)
+
+    // Add a closing bracket if it's valid (closed_count < open_count).
+    If closed_count < open_count:
+        backtrack(result, current_string + ")", open_count, closed_count + 1, max_n)
+7. Python Code (with comments)
+Python
+
+def generate_parenthesis(n):
+    result = []
+
+    def backtrack(current_string, open_count, closed_count):
+        # Base case: We've used all n pairs.
+        if len(current_string) == 2 * n:
+            result.append("".join(current_string))
+            return
+
+        # Recursive step 1: Add an opening bracket.
+        if open_count < n:
+            current_string.append('(')
+            backtrack(current_string, open_count + 1, closed_count)
+            current_string.pop() # backtrack step
+
+        # Recursive step 2: Add a closing bracket.
+        if closed_count < open_count:
+            current_string.append(')')
+            backtrack(current_string, open_count, closed_count + 1)
+            current_string.pop() # backtrack step
+
+    backtrack([], 0, 0)
+    return result
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number} n
+ * @return {string[]}
+ */
+function generateParenthesis(n) {
+    const result = [];
+
+    // backtrack(current_string, openCount, closedCount)
+    function backtrack(current, openCount, closedCount) {
+        // Base case: If the string is complete.
+        if (current.length === 2 * n) {
+            result.push(current);
+            return;
+        }
+
+        // Recursive step 1: Add an opening parenthesis.
+        if (openCount < n) {
+            backtrack(current + '(', openCount + 1, closedCount);
+        }
+
+        // Recursive step 2: Add a closing parenthesis.
+        if (closedCount < openCount) {
+            backtrack(current + ')', openCount, closedCount + 1);
+        }
+    }
+
+    backtrack("", 0, 0);
+    return result;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+backtrack(...)	The recursive function	"This is my core logic. I'll pass it a string I'm building, and the counts of ( and )."
+if len(...) == 2*n	Base case	"If my string is finished, I'll save it as a valid answer and stop this path."
+if open_count < n	First condition	"I can add an opening ( as long as I haven't used all n of them yet."
+backtrack(..., '(', ...)	Recursive call 1	"I'll try adding an opening ( and see where that takes me."
+if closed_count < open_count	Second condition	"I can add a closing ) as long as I have an open ( to close."
+backtrack(..., ')', ...)	Recursive call 2	"I'll try adding a closing ) and see where that takes me."
+
+10. Summary
+Method	Time	Space
+Brute Force	O(2^(2n) * n)	O(n)
+Backtracking (Optimal)	O(4^n / n^(1.5))	O(n)
+Note: Time is complex to analyze, but it's much better than brute-force. n is the number of pairs.

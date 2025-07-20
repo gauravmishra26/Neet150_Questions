@@ -1,0 +1,171 @@
+Problem: Container With Most Water
+
+You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the i-th line are (i, 0) and (i, height[i]).
+
+Find two lines that, together with the x-axis, form a container that holds the most water. Return the maximum amount of water a container can store.
+
+🧪 Example 1:
+
+Input: height = [1,8,6,2,5,4,8,3,7]
+Output: 49
+Explanation: The two lines at indices 1 and 8 (heights 8 and 7) form a container with a height of 7 and a width of 7, giving an area of 49.
+1. Problem Statement
+"Given an array of heights, find two lines that form a container with the maximum water volume."
+
+📦 Input: height = [1,8,6,2,5,4,8,3,7]
+
+🎯 Output: 49 — The container formed by the lines of height 8 and 7 has a width of 7 and a height of min(8, 7) = 7, so the area is 7 * 7 = 49.
+
+2. Real-life Analogy
+Imagine you have a row of planks of varying heights, and you want to build a simple water trough with two of them. The amount of water the trough can hold depends on two things:
+
+Width: The distance between the two planks you choose.
+
+Height: The height of the shorter of the two planks, because water will spill over the top of the shorter one.
+
+You want to choose two planks to maximize width * min(height1, height2). To find the best combination, you could try every possible pair of planks. A smarter way is to start with the two widest planks (the ones at the very ends of the row). Then, to find a better solution, you'd have to find a taller plank. The only way to do that is to move inward from the shorter of the two planks you currently have.
+
+3. Thought Process — Natural Logic
+The area of a container is width * height.
+
+width is the distance between the two lines, which is j - i.
+
+height is limited by the shorter line, which is min(height[i], height[j]).
+
+So, Area = (j - i) * min(height[i], height[j]).
+
+A naive approach would be to calculate this area for every possible pair of lines. But with n lines, there are n * (n-1) / 2 pairs, which is an O(n²) solution.
+
+To achieve O(n), we need to avoid checking every pair. The key insight is to use a Two-Pointer approach. We start with the widest possible container and then move inward, making a smart decision at each step.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Initialize max_area = 0.
+
+Use a nested loop. The outer loop iterates with pointer i from 0 to n-1.
+
+The inner loop iterates with pointer j from i+1 to n-1.
+
+In the inner loop, calculate area = (j - i) * min(height[i], height[j]).
+
+Update max_area = max(max_area, area).
+
+⏳ Time Complexity: O(n²)
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Two Pointers)
+💡 Core Idea: Start with the maximum possible width and then greedily narrow the search space by moving the pointer of the shorter line.
+
+Logic:
+
+Initialize max_area to 0.
+
+Initialize a left pointer at index 0 and a right pointer at index n-1.
+
+Enter a while loop that continues as long as left < right.
+
+In each iteration, calculate the current_area: (right - left) * min(height[left], height[right]).
+
+Update max_area = max(max_area, current_area).
+
+Now, the crucial decision: which pointer to move?
+
+If height[left] is less than height[right], the current height is limited by the left line. To potentially find a taller container, we must try to find a taller left line. So, increment left.
+
+If height[right] is less than or equal to height[left], the current height is limited by the right line. To potentially find a taller container, we must try to find a taller right line. So, decrement right.
+
+The loop ends when the pointers meet.
+
+⏳ Time Complexity: O(n) — The two pointers move towards each other, and each step takes constant time. The loop runs at most n times.
+
+💾 Space Complexity: O(1) — We only use a few variables, which is constant extra space.
+
+6. Pseudocode (with explanation)
+Function maxArea(height):
+    max_area = 0
+    left = 0
+    right = length of height - 1
+
+    While left < right:
+        // Calculate the current area with the current width and height.
+        current_width = right - left
+        current_height = min(height[left], height[right])
+        current_area = current_width * current_height
+
+        // Update the maximum area found so far.
+        max_area = max(max_area, current_area)
+
+        // The key decision: move the pointer of the shorter line.
+        If height[left] is less than height[right]:
+            left = left + 1
+        Else:
+            right = right - 1
+
+    Return max_area
+7. Python Code (with comments)
+Python
+
+def max_area(height):
+    max_area = 0
+    left, right = 0, len(height) - 1
+
+    while left < right:
+        # Calculate the area of the current container.
+        current_area = (right - left) * min(height[left], height[right])
+        
+        # Update the maximum area.
+        max_area = max(max_area, current_area)
+
+        # Move the pointer of the shorter line inward.
+        if height[left] < height[right]:
+            left += 1
+        else:
+            right -= 1
+    
+    return max_area
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} height
+ * @return {number}
+ */
+function maxArea(height) {
+    let maxArea = 0;
+    let left = 0;
+    let right = height.length - 1;
+
+    while (left < right) {
+        // Calculate the current area.
+        const currentHeight = Math.min(height[left], height[right]);
+        const currentWidth = right - left;
+        const currentArea = currentHeight * currentWidth;
+        
+        // Update the maximum area found so far.
+        maxArea = Math.max(maxArea, currentArea);
+
+        // Move the pointer of the shorter line.
+        if (height[left] < height[right]) {
+            left++;
+        } else {
+            right--;
+        }
+    }
+
+    return maxArea;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+left=0, right=n-1	Sets up two pointers	"I'll start with the two planks on the very ends of the row, since they give me the widest container possible."
+while left < right	Loop condition	"Keep checking containers as long as my pointers haven't crossed."
+current_area = ...	Calculates area	"I'll calculate the area of the container formed by my current two planks."
+max_area = max(...)	Updates maximum	"Is this area bigger than the best one I've found so far?"
+if height[left] < height[right]	Decides which pointer to move	"If the left plank is shorter, I'll move it inward. This is because moving the taller (right) plank will only decrease the width and won't increase the height, so it's a wasted move."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(n²)	O(1)
+Optimized (Two Pointers)	O(n)	O(1)

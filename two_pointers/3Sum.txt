@@ -1,0 +1,218 @@
+Problem: 3Sum
+
+Given an array of integers nums, return all the unique triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, j != k, and nums[i] + nums[j] + nums[k] == 0.
+
+The solution set must not contain duplicate triplets.
+
+🧪 Example 1:
+
+Input: nums = [-1,0,1,2,-1,-4]
+Output: [[-1,-1,2],[-1,0,1]]
+1. Problem Statement
+"Given an array of integers nums, return all the unique triplets that sum up to 0."
+
+📦 Input: nums = [-1,0,1,2,-1,-4]
+
+🎯 Output: [[-1,-1,2],[-1,0,1]] — The triplets (-1, 0, 1) and (-1, -1, 2) are the only unique combinations that sum to 0.
+
+2. Real-life Analogy
+Imagine you have a long list of debts and credits (positive and negative numbers), and you're trying to find all the unique combinations of three transactions that cancel each other out (sum to zero).
+
+A good strategy would be to first sort all your transactions by value. Then, you can pick one transaction, say -$4. You're now left with the problem of finding two other transactions that sum up to +4 (since -4 + 4 = 0). You can use the "Two Sum II" method we just discussed on the rest of the sorted list to find those two numbers efficiently. You repeat this for every single transaction, being careful to skip duplicates so you don't find the same solution twice.
+
+3. Thought Process — Natural Logic
+This problem is a direct extension of "Two Sum". To find three numbers that sum to a target, we can fix one number and then find the other two.
+
+Step 1: Sort the array. This is crucial. Sorting allows us to efficiently find the remaining two numbers using the two-pointer technique from "Two Sum II." It also makes handling duplicates much easier.
+
+Step 2: Iterate and Fix One Number. Use a single loop to iterate through the sorted array. The element at the current index i will be our first number.
+
+Step 3: Find the Remaining Two. For the rest of the array, we need to find two numbers that sum up to 0 - nums[i]. We can use the two-pointer technique on the sub-array starting from i+1 to the end.
+
+Step 4: Handle Duplicates. Since the problem requires unique triplets, we need to be careful to skip over duplicates. We can do this in both the outer loop and the inner two-pointer logic.
+
+4. Brute-Force Approach
+Logic: Use three nested loops. The outer loop for index i, the second for index j (starting from i+1), and the third for index k (starting from j+1). Check if nums[i] + nums[j] + nums[k] == 0. Store the unique triplets in a set to handle duplicates.
+
+⏳ Time Complexity: O(n³) — The three nested loops are highly inefficient.
+
+💾 Space Complexity: O(n) or O(log n) for the set to store results, depending on the number of unique triplets.
+
+5. Optimized Approach (Sorting + Two Pointers)
+💡 Core Idea: Sort the array and then iterate through each element, using a two-pointer approach on the remaining sub-array to find the other two elements of the triplet.
+
+Logic:
+
+Sort the array nums.
+
+Create an empty list results to store the triplets.
+
+Iterate through the array with a pointer i from 0 to n-3.
+
+Crucial Duplicate Check: If i > 0 and nums[i] is the same as nums[i-1], continue to the next iteration. This ensures we don't process the same number as the first element of a triplet multiple times.
+
+Initialize left pointer to i + 1 and right pointer to n - 1.
+
+Enter a while loop that runs as long as left < right.
+
+Calculate current_sum = nums[i] + nums[left] + nums[right].
+
+Compare Sum:
+
+If current_sum < 0, the sum is too small. Increment left to get a larger number.
+
+If current_sum > 0, the sum is too large. Decrement right to get a smaller number.
+
+If current_sum == 0, we've found a valid triplet. Add [nums[i], nums[left], nums[right]] to results.
+
+Crucial Duplicate Handling: After finding a valid triplet, we must move both left and right pointers past any duplicates to ensure the next triplet is unique.
+
+Return results.
+
+⏳ Time Complexity: O(n²) — The initial sort is O(n log n), but the main loop is O(n), and the inner two-pointer while loop is also O(n), making the total O(n * n) = O(n²).
+
+💾 Space Complexity: O(1) or O(n) depending on the sorting algorithm. If an in-place sort is used, it's O(1) space. The space for the output list is not counted as extra space.
+
+6. Pseudocode (with explanation)
+Function threeSum(nums):
+    Sort nums
+    results = []
+    n = length of nums
+
+    // Iterate through the array, fixing the first number.
+    For i from 0 to n - 3:
+        // Skip duplicate numbers for the first element.
+        If i > 0 and nums[i] == nums[i-1]:
+            Continue
+
+        left = i + 1
+        right = n - 1
+
+        // Use two pointers to find the other two numbers.
+        While left < right:
+            current_sum = nums[i] + nums[left] + nums[right]
+
+            If current_sum < 0:
+                left = left + 1
+            Else if current_sum > 0:
+                right = right - 1
+            Else: // Found a triplet that sums to zero
+                Append [nums[i], nums[left], nums[right]] to results
+                left = left + 1
+                right = right - 1
+
+                // Skip duplicates for the second and third elements.
+                While left < right and nums[left] == nums[left - 1]:
+                    left = left + 1
+                While left < right and nums[right] == nums[right + 1]:
+                    right = right - 1
+
+    Return results
+7. Python Code (with comments)
+Python
+
+def three_sum(nums):
+    # Step 1: Sort the array.
+    nums.sort()
+    results = []
+    n = len(nums)
+
+    # Step 2: Iterate through the array, fixing the first element.
+    # We stop at n-2 because we need at least two more elements for the triplet.
+    for i in range(n - 2):
+        # Step 4: Skip duplicates for the first element.
+        if i > 0 and nums[i] == nums[i-1]:
+            continue
+        
+        # Step 3: Set up two pointers for the rest of the array.
+        left = i + 1
+        right = n - 1
+
+        # Two-pointer search for the remaining two elements.
+        while left < right:
+            current_sum = nums[i] + nums[left] + nums[right]
+            
+            if current_sum < 0:
+                left += 1
+            elif current_sum > 0:
+                right -= 1
+            else: # current_sum == 0
+                results.append([nums[i], nums[left], nums[right]])
+                
+                # Move pointers to find the next unique pair.
+                left += 1
+                right -= 1
+
+                # Step 4 (cont.): Skip duplicates for the second and third elements.
+                while left < right and nums[left] == nums[left - 1]:
+                    left += 1
+                while left < right and nums[right] == nums[right + 1]:
+                    right -= 1
+    
+    return results
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} nums
+ * @return {number[][]}
+ */
+function threeSum(nums) {
+    // Step 1: Sort the array.
+    nums.sort((a, b) => a - b);
+    const results = [];
+    const n = nums.length;
+
+    // Step 2: Iterate through the array, fixing the first element.
+    for (let i = 0; i < n - 2; i++) {
+        // Step 4: Skip duplicates for the first element to avoid duplicate triplets.
+        if (i > 0 && nums[i] === nums[i - 1]) {
+            continue;
+        }
+
+        // Step 3: Set up two pointers for the sub-array.
+        let left = i + 1;
+        let right = n - 1;
+
+        // Two-pointer search.
+        while (left < right) {
+            const sum = nums[i] + nums[left] + nums[right];
+
+            if (sum === 0) {
+                // Found a valid triplet.
+                results.push([nums[i], nums[left], nums[right]]);
+                
+                // Move both pointers to continue the search.
+                left++;
+                right--;
+
+                // Step 4 (cont.): Skip duplicates for the second and third elements.
+                while (left < right && nums[left] === nums[left - 1]) {
+                    left++;
+                }
+                while (left < right && nums[right] === nums[right + 1]) {
+                    right--;
+                }
+            } else if (sum < 0) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+    }
+    return results;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+nums.sort()	Sorts the array	"First, I'll put all the numbers in order. This helps with two things: finding pairs faster and skipping duplicates."
+for i in range(n-2)	Iterates and fixes the first number	"I'll pick one number at a time as the first part of my triplet."
+if i > 0 and nums[i] == ...	Skips first-number duplicates	"If I just used this number, I'll skip it to avoid finding the same combination."
+left=i+1, right=n-1	Sets up two pointers	"Now, for the rest of the list, I'll use my two-pointer strategy to find the other two numbers."
+if sum < 0 / sum > 0	Adjusts pointers based on sum	"If my three numbers don't add up to zero, I'll move my pointers to get a bigger or smaller sum, just like in 'Two Sum II'."
+while left < right ...	Skips second/third number duplicates	"I found a match, so I'll move my pointers past any other identical numbers to find a new combination."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Three Loops)	O(n³)	O(n)
+Optimized (Sort + Two Pointers)	O(n²)	O(1) or O(n)

@@ -1,0 +1,184 @@
+Problem: Valid Palindrome
+
+Given a string s, return true if it is a palindrome, otherwise return false.
+
+A palindrome is a string that reads the same forward and backward. It is also case-insensitive and ignores all non-alphanumeric characters.
+
+Note: Alphanumeric characters consist of letters (A-Z, a-z) and numbers (0-9).
+
+🧪 Example 1:
+
+Input: s = "Was it a car or a cat I saw?"
+Output: true
+Explanation: After considering only alphanumerical characters we have "wasitacaroracatisaw", which is a palindrome.
+1. Problem Statement
+"Given a string s, return true if it is a palindrome, otherwise return false. A palindrome is case-insensitive and ignores all non-alphanumeric characters."
+
+📦 Input: s = "Was it a car or a cat I saw?"
+
+🎯 Output: true — The processed string "wasitacaroracatisaw" reads the same forwards and backwards.
+
+2. Real-life Analogy
+Imagine you have a secret message written on a scroll, but it's full of spaces, punctuation, and some letters are capitalized while others are not. You know the real message is hidden, and it reads the same forwards and backwards.
+
+To decode it, you first need to clean it up:
+
+Filter: Ignore everything that isn't a letter or a number.
+
+Normalize: Make all the letters the same case (e.g., lowercase).
+
+Now that you have the clean message, you check if the first letter matches the last, the second matches the second-to-last, and so on, until you get to the middle. If all pairs match, the message is a palindrome!
+
+3. Thought Process — Natural Logic
+This problem can be broken down into two main steps:
+
+Preprocessing: Create a "clean" version of the string that contains only lowercase alphanumeric characters.
+
+Validation: Check if this new, clean string is a palindrome.
+
+A straightforward way to validate is to compare the string to its reverse. A more efficient way is to use two pointers to compare characters from the outside in. The two-pointer approach can be applied directly to the original string, avoiding the need for a separate preprocessing step and saving space.
+
+4. Less Optimized Approach (Preprocessing and Reversing)
+Logic:
+
+Create a new, empty string or a list of characters.
+
+Iterate through the input string s.
+
+For each character, check if it's alphanumeric. If it is, convert it to lowercase and append it to your new string/list.
+
+Join the list into a new string (if you used a list).
+
+Check if this new string is equal to its reversed version.
+
+⏳ Time Complexity: O(n) — You iterate through the string to build the new one, and then the reversing and comparison also take time proportional to the string's length.
+
+💾 Space Complexity: O(n) — You are creating a new string, which in the worst case can be as long as the original string.
+
+5. Optimized Approach (Two Pointers)
+💡 Core Idea: Use two pointers, one at each end of the original string, and move them inwards, skipping any non-alphanumeric characters, until they meet.
+
+Logic:
+
+Initialize a left pointer to the beginning of the string (index 0) and a right pointer to the end of the string (index n-1).
+
+Use a while loop that continues as long as left < right.
+
+Inside the loop, move the left pointer to the right as long as the character at s[left] is not alphanumeric.
+
+Similarly, move the right pointer to the left as long as the character at s[right] is not alphanumeric.
+
+If the pointers haven't crossed (left < right):
+
+Compare the lowercase versions of the characters at s[left] and s[right].
+
+If they don't match, return false.
+
+If they match, move both pointers inward (left++, right--).
+
+If the while loop finishes without returning false, it means all valid characters matched. Return true.
+
+⏳ Time Complexity: O(n) — We traverse the string once with the two pointers.
+
+💾 Space Complexity: O(1) — We do not create any new strings or data structures whose size depends on the input.
+
+6. Pseudocode (with explanation)
+Function isPalindrome(s):
+    left = 0
+    right = length of s - 1
+
+    While left < right:
+        // Move left pointer to the first alphanumeric character
+        While left < right and character at s[left] is not alphanumeric:
+            left = left + 1
+
+        // Move right pointer to the first alphanumeric character from the right
+        While left < right and character at s[right] is not alphanumeric:
+            right = right - 1
+
+        // Compare the characters (after converting to lowercase)
+        If lowercase of s[left] is not equal to lowercase of s[right]:
+            Return False
+
+        // Move pointers inward for the next comparison
+        left = left + 1
+        right = right - 1
+
+    // If the loop completes, it's a palindrome.
+    Return True
+7. Python Code (with comments)
+Python
+
+def is_palindrome(s):
+    left, right = 0, len(s) - 1
+
+    while left < right:
+        # Move left pointer past non-alphanumeric characters
+        while left < right and not s[left].isalnum():
+            left += 1
+
+        # Move right pointer past non-alphanumeric characters
+        while left < right and not s[right].isalnum():
+            right -= 1
+        
+        # Now, compare the alphanumeric characters
+        if s[left].lower() != s[right].lower():
+            return False
+        
+        # Move both pointers inward
+        left += 1
+        right -= 1
+
+    return True
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {string} s
+ * @return {boolean}
+ */
+function isPalindrome(s) {
+    let left = 0;
+    let right = s.length - 1;
+
+    while (left < right) {
+        // Regular expression to check for alphanumeric characters
+        const isAlphaNumeric = (char) => /[a-z0-9]/.test(char.toLowerCase());
+
+        // Move left pointer inwards, skipping non-alphanumeric characters
+        while (left < right && !isAlphaNumeric(s[left])) {
+            left++;
+        }
+
+        // Move right pointer inwards, skipping non-alphanumeric characters
+        while (left < right && !isAlphaNumeric(s[right])) {
+            right--;
+        }
+
+        // Now, compare the characters. We convert to lowercase for case-insensitivity.
+        if (s[left].toLowerCase() !== s[right].toLowerCase()) {
+            return false;
+        }
+
+        // Move both pointers for the next comparison.
+        left++;
+        right--;
+    }
+
+    // If the loop finishes without a mismatch, it's a palindrome.
+    return true;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+left = 0, right = n-1	Initializes two pointers	"I'll put one finger on the first letter and one on the last."
+while left < right	Loop condition	"Keep checking as long as my fingers haven't met."
+while ... not isalnum()	Skips non-alphanumeric chars	"Slide my finger past any spaces, commas, or other junk."
+if s[left].lower() != s[right].lower()	Compares characters	"Do the first meaningful letter and the last meaningful letter match?"
+left++, right--	Moves pointers inward	"They match, so I'll move my fingers in one step each to check the next pair."
+return True	All pairs matched	"All the letters I checked matched, so it's a palindrome!"
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Less Optimized (Preprocess & Reverse)	O(n)	O(n)
+Optimized (Two Pointers)	O(n)	O(1)

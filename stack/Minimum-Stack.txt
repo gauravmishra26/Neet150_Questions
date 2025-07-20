@@ -1,0 +1,184 @@
+Problem: Minimum Stack
+
+Design a stack class that supports the push, pop, top, and getMin operations.
+
+MinStack() initializes the stack object.
+
+void push(int val) pushes the element val onto the stack.
+
+void pop() removes the element on the top of the stack.
+
+int top() gets the top element of the stack.
+
+int getMin() retrieves the minimum element in the stack.
+
+Each function should run in O(1) time.
+
+🧪 Example 1:
+
+Input: ["MinStack", "push", 1, "push", 2, "push", 0, "getMin", "pop", "top", "getMin"]
+Output: [null, null, null, null, 0, null, 2, 1]
+1. Problem Statement
+"Design a stack that, in addition to standard stack operations (push, pop, top), can also retrieve the minimum element in constant O(1) time."
+
+📦 Input: A series of stack operations.
+
+🎯 Output: The results of the getMin and top operations.
+
+2. Real-life Analogy
+Imagine you're a stock market analyst keeping track of daily stock prices. Every time you add a new price, you also note down the lowest price recorded so far. If you ever need to remove the most recent price, you also remove the corresponding lowest-price note. This way, if you need to know the minimum price for all prices currently on your list, you just look at your most recent note.
+
+The key insight is to store the "minimum so far" information along with each element as it's pushed onto the stack.
+
+3. Thought Process — Natural Logic
+A standard stack (list or array) is great for push, pop, and top (all O(1)). However, to find the minimum, we would normally have to iterate through all elements, which is O(n). To achieve the O(1) time complexity for getMin(), we must pre-compute and store the minimum value alongside the data as we push it onto the stack.
+
+There are two primary ways to implement this, both relying on the same core principle:
+
+Two Stacks: Use a main stack for the values and a second "minimum stack" that only stores the current minimum value for each state. When you push, you compare the new value with the top of the minimum stack and push the smaller one. When you pop, you pop from both stacks.
+
+Single Stack with Pairs: Store tuples or objects on a single stack. Each element on the stack will be a pair (value, current_minimum). When you push a new value, you calculate the new minimum based on the current minimum (at the top of the stack) and the new value.
+
+The single-stack approach can be slightly more memory-efficient and is often cleaner to implement.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Use a single standard stack to store the values.
+
+push, pop, top work as usual in O(1) time.
+
+For getMin(), iterate through the entire stack to find the minimum value.
+
+⏳ Time Complexity: O(1) for push, pop, top; O(n) for getMin().
+
+💾 Space Complexity: O(n).
+
+5. Optimized Approach (Single Stack with Pairs)
+💡 Core Idea: Each element in the stack also stores the minimum value of the stack up to that point.
+
+Logic:
+
+The stack will store pairs: (value, min_so_far).
+
+MinStack(): Initialize an empty stack.
+
+push(val):
+
+Determine the new minimum. If the stack is empty, the new minimum is val. Otherwise, it's min(val, stack.top().min).
+
+Push the pair (val, new_min) onto the stack.
+
+pop():
+
+Remove the top element from the stack.
+
+top():
+
+Return the value from the top element of the stack.
+
+getMin():
+
+Return the min_so_far from the top element of the stack.
+
+⏳ Time Complexity: O(1) for all operations.
+
+💾 Space Complexity: O(n) — We are storing two values for each element on the stack.
+
+6. Pseudocode (with explanation)
+Class MinStack:
+    Constructor:
+        this.stack = new empty list/array
+
+    push(val):
+        min_so_far = val
+        If this.stack is not empty:
+            min_so_far = min(val, this.stack.peek().min_so_far)
+        
+        this.stack.push({
+            value: val,
+            min_so_far: min_so_far
+        })
+
+    pop():
+        this.stack.pop()
+
+    top():
+        Return this.stack.peek().value
+
+    getMin():
+        Return this.stack.peek().min_so_far
+7. Python Code (with comments)
+Python
+
+class MinStack:
+    def __init__(self):
+        # The stack will store tuples: (value, current_min)
+        self.stack = []
+
+    def push(self, val: int) -> None:
+        if not self.stack:
+            # If the stack is empty, the current value is also the minimum.
+            self.stack.append((val, val))
+        else:
+            # The new minimum is the smaller of the new value and the current min.
+            current_min = self.stack[-1][1]
+            new_min = min(val, current_min)
+            self.stack.append((val, new_min))
+
+    def pop(self) -> None:
+        self.stack.pop()
+
+    def top(self) -> int:
+        # Return the value from the top element.
+        return self.stack[-1][0]
+
+    def getMin(self) -> int:
+        # Return the min_so_far from the top element.
+        return self.stack[-1][1]
+8. JavaScript Code (with comments)
+JavaScript
+
+class MinStack {
+    constructor() {
+        // The stack will store objects: {value, minSoFar}
+        this.stack = [];
+    }
+
+    push(val) {
+        let minSoFar = val;
+        if (this.stack.length > 0) {
+            // New minimum is the smaller of the new value and the current min.
+            minSoFar = Math.min(val, this.stack[this.stack.length - 1].minSoFar);
+        }
+        this.stack.push({ value: val, minSoFar: minSoFar });
+    }
+
+    pop() {
+        this.stack.pop();
+    }
+
+    top() {
+        // Return the value from the top element.
+        return this.stack[this.stack.length - 1].value;
+    }
+
+    getMin() {
+        // Return the minSoFar from the top element.
+        return this.stack[this.stack.length - 1].minSoFar;
+    }
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Function	What it does	Meaning
+push(val)	Adds a value with its min_so_far	"When I add a new item, I will also record the lowest item I've seen so far, including this new one."
+pop()	Removes the top item	"I'll remove the top item and its min_so_far record."
+top()	Looks at the top value	"I'll look at the value of the item at the very top of my stack."
+getMin()	Retrieves the minimum	"I'll look at the min_so_far record on the item at the very top of my stack. That's my minimum!"
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (getMin is O(n))	push, pop, top: O(1); getMin: O(n)	O(n)
+Optimized (Two Stacks)	All operations: O(1)	O(n)
+Optimized (Single Stack with Pairs)	All operations: O(1)	O(n)
+Note: O(n) space is required for n elements in the stack.		

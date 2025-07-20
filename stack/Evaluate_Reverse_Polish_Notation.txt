@@ -1,0 +1,170 @@
+Problem: Evaluate Reverse Polish Notation
+
+You are given an array of strings tokens that represents a valid arithmetic expression in Reverse Polish Notation. Return the integer that represents the evaluation of the expression.
+
+The operands may be integers or the results of other operations. The operators include +, -, *, and /.
+
+Assume that division between integers always truncates toward zero.
+
+🧪 Example 1:
+
+Input: tokens = ["1","2","+","3","*","4","-"]
+Output: 5
+Explanation: ((1 + 2) * 3) - 4 = 5
+1. Problem Statement
+"Given an array of strings representing an arithmetic expression in Reverse Polish Notation, evaluate the expression."
+
+📦 Input: tokens = ["1","2","+","3","*","4","-"]
+
+🎯 Output: 5 — The result of the expression.
+
+2. Real-life Analogy
+Imagine you're using a calculator with a stack. Instead of typing (1+2), you'd type 1 enter 2 enter +. Each time you enter a number, it goes onto the stack. When you hit an operator, the calculator automatically takes the last two numbers you entered, performs the operation, and puts the result back onto the stack for the next operation. The final number on the stack is your answer.
+
+3. Thought Process — Natural Logic
+The key characteristic of Reverse Polish Notation (also known as postfix notation) is that operators appear after their operands. This means that to perform an operation, you need access to the two most recently processed numbers. This "Last-In, First-Out" (LIFO) behavior is the defining feature of a Stack data structure.
+
+The algorithm is simple and intuitive:
+
+Scan the tokens array from left to right.
+
+If you see a number, it's an operand. Push it onto a stack.
+
+If you see an operator, it's time to perform a calculation. The two operands are the last two numbers you processed, which are conveniently at the top of your stack.
+
+Pop the two operands, perform the operation, and push the result back onto the stack.
+
+After processing all tokens, the final result will be the single element left on the stack.
+
+4. Less Optimized Approach (Iterative without a Stack)
+Logic:
+
+It is not practical to solve this problem without a stack-like structure. A simple linear scan would not work because you wouldn't know which two operands to apply an operator to without storing previous values. Trying to find operands by looking backward in the array would be convoluted and likely inefficient, similar to a brute-force approach.
+
+The stack-based solution is so natural and efficient that it's considered the standard, optimal approach.
+
+⏳ Time Complexity: An attempt at a non-stack solution would likely be O(n²) or worse.
+
+💾 Space Complexity: O(1) or worse.
+
+5. Optimized Approach (Stack)
+💡 Core Idea: Use a stack to hold numerical operands. When an operator is encountered, pop the top two operands, perform the operation, and push the result back.
+
+Logic:
+
+Initialize an empty stack.
+
+Iterate through each token in the tokens array.
+
+If token is an operator (+, -, *, /):
+
+Pop the top two numbers from the stack. Let's call them operand2 and operand1. The order is important: operand1 is the second-to-last pushed number, and operand2 is the last.
+
+Perform the corresponding operation: result = operand1 op operand2.
+
+Push the result back onto the stack.
+
+If token is a number:
+
+Convert the string token to an integer and push it onto the stack.
+
+After the loop, the single remaining element on the stack is the final result. Return it.
+
+⏳ Time Complexity: O(n) — We iterate through the tokens array once. Each stack operation is O(1).
+
+💾 Space Complexity: O(n) — In the worst-case scenario (e.g., [1, 2, 3, ..., n, '+', '-']), the stack could hold up to O(n) elements.
+
+6. Pseudocode (with explanation)
+Function evalRPN(tokens):
+    stack = new empty list/stack
+    
+    operators = {'+', '-', '*', '/'}
+
+    For each token in tokens:
+        If token is in operators:
+            operand2 = stack.pop()
+            operand1 = stack.pop()
+            
+            result = perform_operation(operand1, operand2, token)
+            stack.push(result)
+        
+        Else:
+            stack.push(integer_value_of(token))
+            
+    Return stack.pop()
+7. Python Code (with comments)
+Python
+
+import math
+
+def eval_rpn(tokens):
+    stack = []
+    
+    for token in tokens:
+        if token == '+':
+            stack.append(stack.pop() + stack.pop())
+        elif token == '-':
+            # Be careful with the order for subtraction.
+            operand2 = stack.pop()
+            operand1 = stack.pop()
+            stack.append(operand1 - operand2)
+        elif token == '*':
+            stack.append(stack.pop() * stack.pop())
+        elif token == '/':
+            # Be careful with the order and integer division.
+            operand2 = stack.pop()
+            operand1 = stack.pop()
+            # Truncate towards zero
+            stack.append(int(operand1 / operand2))
+        else:
+            # Token is an integer, push it.
+            stack.append(int(token))
+            
+    return stack[0]
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {string[]} tokens
+ * @return {number}
+ */
+function evalRPN(tokens) {
+    const stack = [];
+    
+    for (const token of tokens) {
+        if (token === '+') {
+            stack.push(stack.pop() + stack.pop());
+        } else if (token === '-') {
+            const operand2 = stack.pop();
+            const operand1 = stack.pop();
+            stack.push(operand1 - operand2);
+        } else if (token === '*') {
+            stack.push(stack.pop() * stack.pop());
+        } else if (token === '/') {
+            const operand2 = stack.pop();
+            const operand1 = stack.pop();
+            // Integer division, truncates towards zero.
+            stack.push(parseInt(operand1 / operand2));
+        } else {
+            stack.push(parseInt(token));
+        }
+    }
+    
+    return stack[0];
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+stack = []	Initializes a stack	"I'll use this list as my scratchpad to hold numbers."
+for token in tokens	Reads each token	"I'll read the expression one item at a time."
+if token is an operator	Handles operators	"I see an operator! I need to do a calculation. I'll take the two most recent numbers from my scratchpad..."
+stack.pop()	Pops operands	"...grab the top two numbers from my list..."
+stack.append(result)	Pushes result	"...do the math, and write the answer back on top of my list."
+else: stack.append(...)	Handles numbers	"I see a number. I'll just write it down on top of my list."
+return stack[0]	Returns final result	"I've reached the end of the expression. The single number left on my list is the final answer."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Impractical)	O(n²)	O(n)
+Optimized (Stack)	O(n)	O(n)
+Note: n=len(tokens). The stack size can be up to n/2 + 1 in the worst case.		

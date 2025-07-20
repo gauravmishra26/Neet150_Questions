@@ -1,0 +1,214 @@
+Problem: Search in Rotated Sorted Array
+
+You are given an array of length n which was originally sorted in ascending order. It has now been rotated between 1 and n times.
+
+Given the rotated sorted array nums and an integer target, return the index of target within nums, or -1 if it is not present.
+
+A solution that runs in O(n) time is trivial, can you write an algorithm that runs in O(log n) time?
+
+🧪 Example 1:
+
+Input: nums = [3,4,5,6,1,2], target = 1
+Output: 4
+1. Problem Statement
+"Given a sorted array that has been rotated, find a target value in logarithmic time."
+
+📦 Input: nums = [3,4,5,6,1,2], target = 1
+
+🎯 Output: 4 — The index of the target 1.
+
+2. Real-life Analogy
+Imagine a list of sorted customer IDs, but someone has cut the list and pasted the back half to the front. You need to find a specific ID. You can't use a standard search because the list is no longer a single sorted sequence.
+
+However, you can observe that one half of the list (either the front or the back) is still perfectly sorted. You can find the middle of your current search space and figure out which half is sorted. If the target falls within that sorted half, you search there. Otherwise, you know the target must be in the other, unsorted half.
+
+3. Thought Process — Natural Logic
+The O(log n) complexity and the sorted-like structure of the array are clear indicators for a Binary Search approach. The trick is to handle the rotation.
+
+At any point in our binary search, when we look at the middle element mid, we can determine which half of the array is sorted by comparing nums[mid] to nums[left] or nums[right].
+
+Let's use nums[left] as our anchor:
+
+Step 1: Define search space with left and right pointers.
+
+Step 2: Find the middle element mid.
+
+Step 3: Check if we have a match. if nums[mid] == target, return mid.
+
+Step 4: Figure out which half is sorted.
+
+If nums[left] <= nums[mid]: The left part of the array (left to mid) is sorted.
+
+Now, check if the target falls within this sorted range: nums[left] <= target < nums[mid].
+
+If yes, the target must be in the left half. We can discard the right half by setting right = mid - 1.
+
+If no, the target must be in the right, unsorted part. We discard the left half by setting left = mid + 1.
+
+If nums[left] > nums[mid]: The left part is unsorted, which means the right part (mid to right) must be sorted.
+
+Check if the target falls within this sorted range: nums[mid] < target <= nums[right].
+
+If yes, the target must be in the right half. Discard the left: left = mid + 1.
+
+If no, the target must be in the left, unsorted part. Discard the right: right = mid - 1.
+
+This process continues, halving the search space in each step, until we find the target or the search space is exhausted.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Iterate through the array with a simple for loop.
+
+Compare each element to the target.
+
+If a match is found, return the index.
+
+If the loop finishes, return -1.
+
+⏳ Time Complexity: O(n)
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Binary Search)
+💡 Core Idea: Adapt binary search by checking which half of the array is sorted and using that information to decide where to search next.
+
+Logic:
+
+Initialize left = 0, right = n - 1.
+
+Start a while loop with the condition left <= right.
+
+Calculate mid = left + (right - left) // 2.
+
+If nums[mid] == target, return mid.
+
+Check if the left half is sorted (nums[left] <= nums[mid]):
+
+If so, check if the target is in the left half's range. If yes, right = mid - 1. Otherwise, left = mid + 1.
+
+If the left half is not sorted (the right half must be):
+
+Check if the target is in the right half's range. If yes, left = mid + 1. Otherwise, right = mid - 1.
+
+If the loop finishes, return -1.
+
+⏳ Time Complexity: O(log n)
+
+💾 Space Complexity: O(1)
+
+6. Pseudocode (with explanation)
+Function search(nums, target):
+    left = 0
+    right = length of nums - 1
+
+    While left <= right:
+        mid = left + (right - left) // 2
+        
+        If nums[mid] == target:
+            Return mid
+        
+        // Is the left half sorted?
+        If nums[left] <= nums[mid]:
+            // Is target in the sorted left half?
+            If target >= nums[left] AND target < nums[mid]:
+                right = mid - 1
+            Else:
+                // Target must be in the right half.
+                left = mid + 1
+        Else:
+            // The right half must be sorted.
+            // Is target in the sorted right half?
+            If target > nums[mid] AND target <= nums[right]:
+                left = mid + 1
+            Else:
+                // Target must be in the left half.
+                right = mid - 1
+            
+    Return -1
+7. Python Code (with comments)
+Python
+
+def search(nums, target):
+    left, right = 0, len(nums) - 1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+        
+        if nums[mid] == target:
+            return mid
+        
+        # Is the left half sorted?
+        if nums[left] <= nums[mid]:
+            # Is target in the sorted left half?
+            if nums[left] <= target < nums[mid]:
+                right = mid - 1
+            else:
+                left = mid + 1
+        # The right half must be sorted.
+        else:
+            # Is target in the sorted right half?
+            if nums[mid] < target <= nums[right]:
+                left = mid + 1
+            else:
+                right = mid - 1
+                
+    return -1
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number}
+ */
+function search(nums, target) {
+    let left = 0;
+    let right = nums.length - 1;
+
+    while (left <= right) {
+        const mid = Math.floor(left + (right - left) / 2);
+
+        if (nums[mid] === target) {
+            return mid;
+        }
+
+        // Check if the left half is sorted
+        if (nums[left] <= nums[mid]) {
+            // Check if the target is in the left sorted half
+            if (nums[left] <= target && target < nums[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        } 
+        // The right half must be sorted
+        else {
+            // Check if the target is in the right sorted half
+            if (nums[mid] < target && target <= nums[right]) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+    }
+
+    return -1;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+while left <= right	Binary search loop	"I'll keep looking until the search space is gone."
+mid = ...	Finds the middle	"I'll check the middle element to guide my search."
+if nums[mid] == target	Found it!	"If I find the target, I'm done!"
+if nums[left] <= nums[mid]	Checks if left half is sorted	"Is the left part of the array (left to mid) in normal sorted order?"
+if target is in left part	Searches sorted half	"Yes it is. Is my target within this sorted range? If so, I'll search only there."
+else ...	Searches other half	"No, my target isn't there, so it must be in the other, unsorted part. I'll search there instead."
+else ...	Right half is sorted	"The left part is not sorted, so the right part must be. I'll do the same check for the right side."
+return -1	Target not found	"I've checked everywhere and the target isn't here."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Linear Scan)	O(n)	O(1)
+Optimized (Binary Search)	O(log n)	O(1)
+Note: n is the number of elements in nums.	

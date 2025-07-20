@@ -1,0 +1,160 @@
+Problem: Daily Temperatures
+
+You are given an array of integers temperatures where temperatures[i] represents the daily temperatures on the ith day.
+
+Return an array result where result[i] is the number of days after the ith day before a warmer temperature appears on a future day. If there is no day in the future where a warmer temperature will appear for the ith day, set result[i] to 0 instead.
+
+🧪 Example 1:
+
+Input: temperatures = [30,38,30,36,35,40,28]
+Output: [1,4,1,2,1,0,0]
+1. Problem Statement
+"For each day's temperature, find the number of days until a warmer temperature occurs. If none exists, the answer is 0."
+
+📦 Input: temperatures = [30,38,30,36,35,40,28]
+
+🎯 Output: [1,4,1,2,1,0,0] — For example, for day 0 (30), the next warmer day is day 1 (38), so the result is 1.
+
+2. Real-life Analogy
+Imagine you have a list of daily stock prices. You want to know, for each day, how many days it takes for the price to exceed that day's price. If the price never goes higher on a future day, the answer is 0.
+
+A standard for loop would be too slow, like checking every future day individually. A better way is to keep a special list of "days waiting for a warmer temperature." When a new day comes, you can quickly check if it's warmer than any of the waiting days. If it is, you've found their answer! This is the essence of a Monotonic Stack.
+
+3. Thought Process — Natural Logic
+This problem asks us to find the "next greater element" for each element in the array. This is a classic pattern that can be solved efficiently using a Stack.
+
+The intuition behind using a stack is that as we iterate through the temperatures, we want to keep track of previous days for which we have not yet found a warmer temperature. The stack will store the indices of these days.
+
+To optimize the search, we can maintain a monotonically decreasing stack. This means the temperatures corresponding to the indices in our stack will always be in decreasing order from bottom to top.
+
+If the new day's temperature is warmer than the top of the stack, we know we've found the "next greater element" for that day. We can then calculate the number of days and pop the index from the stack. We repeat this until the stack is empty or the new day's temperature is no longer warmer.
+
+We then push the current day's index onto the stack, maintaining the decreasing order.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Initialize a result array of the same size as temperatures, filled with zeros.
+
+Use a nested loop. The outer loop iterates from i = 0 to n-1.
+
+The inner loop iterates from j = i+1 to n-1.
+
+If temperatures[j] > temperatures[i], we've found the first warmer day. Set result[i] = j - i, and break the inner loop to move to the next day.
+
+⏳ Time Complexity: O(n²)
+
+💾 Space Complexity: O(n) for the result array.
+
+5. Optimized Approach (Monotonic Stack)
+💡 Core Idea: Use a stack to store indices of days with decreasing temperatures. When a warmer day is found, pop previous days and calculate their waiting time.
+
+Logic:
+
+Initialize a result array of zeros of the same size as temperatures.
+
+Initialize an empty stack. The stack will hold indices.
+
+Iterate through the temperatures array with index i and value temp.
+
+While the stack is not empty and the current temperature temp is warmer than the temperature at the index on top of the stack:
+
+prev_index = stack.pop().
+
+Calculate the waiting days: result[prev_index] = i - prev_index.
+
+Push the current index i onto the stack. This index is now waiting for its warmer day.
+
+After the loop, any remaining indices in the stack have no warmer day in the future. Their corresponding result values remain 0, which is the correct default.
+
+⏳ Time Complexity: O(n) — Each index is pushed onto and popped from the stack at most once.
+
+💾 Space Complexity: O(n) — In the worst case (e.g., [5, 4, 3, 2, 1]), all indices are pushed onto the stack.
+
+6. Pseudocode (with explanation)
+Function dailyTemperatures(temperatures):
+    n = length of temperatures
+    result = new array of size n, filled with 0
+    stack = new empty list/stack
+
+    // Iterate through the temperatures array with their indices.
+    For i from 0 to n - 1:
+        current_temp = temperatures[i]
+
+        // While stack is not empty AND current temp is warmer than the temp at the top of the stack:
+        While stack is not empty AND current_temp > temperatures[stack.peek()]:
+            // Pop the index of the day that just found its warmer day.
+            prev_index = stack.pop()
+            // Calculate the number of days until the warmer temp.
+            result[prev_index] = i - prev_index
+
+        // Push the current day's index onto the stack.
+        stack.push(i)
+
+    Return result
+7. Python Code (with comments)
+Python
+
+def daily_temperatures(temperatures):
+    n = len(temperatures)
+    result = [0] * n
+    stack = [] # Stores indices
+
+    for i, temp in enumerate(temperatures):
+        # While the stack is not empty AND the current temperature is warmer
+        # than the temperature at the index on top of the stack...
+        while stack and temp > temperatures[stack[-1]]:
+            # Pop the index of the day that just found its warmer day.
+            prev_index = stack.pop()
+            # Calculate the number of days until the warmer temp.
+            result[prev_index] = i - prev_index
+
+        # Push the current day's index onto the stack.
+        stack.append(i)
+
+    return result
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} temperatures
+ * @return {number[]}
+ */
+function dailyTemperatures(temperatures) {
+    const n = temperatures.length;
+    const result = new Array(n).fill(0);
+    const stack = []; // Stores indices
+
+    for (let i = 0; i < n; i++) {
+        const currentTemp = temperatures[i];
+
+        // While stack is not empty AND the current temperature is warmer...
+        while (stack.length > 0 && currentTemp > temperatures[stack[stack.length - 1]]) {
+            // Pop the index of the day that found its warmer day.
+            const prevIndex = stack.pop();
+            // Calculate the number of days.
+            result[prevIndex] = i - prevIndex;
+        }
+
+        // Push the current index onto the stack.
+        stack.push(i);
+    }
+
+    return result;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+result = [0] * n	Initializes the result	"I'll create an answer sheet. All answers are 0 by default, just in case a warmer day is never found."
+stack = []	Initializes the stack	"I'll use this as a place to keep track of the days that are still waiting for a warmer temperature."
+for i, temp in ...	Iterates through days	"I'll go through each day, one by one."
+while stack and temp > ...	Checks for warmer days	"Is today's temperature warmer than the last day I was waiting on? If so..."
+prev_index = stack.pop()	Finds a waiting day	"...that waiting day has found its answer! I'll take it off my list of waiting days."
+result[prev_index] = i - prev_index	Records the answer	"...and write down how many days it took to find a warmer temperature."
+stack.append(i)	Adds to waiting list	"Now, I'll put today on my list of waiting days."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(n²)	O(n)
+Optimized (Monotonic Stack)	O(n)	O(n)
+Note: n=len(temperatures). Stack space can be up to n in the worst case.

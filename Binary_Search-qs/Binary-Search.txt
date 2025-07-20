@@ -1,0 +1,173 @@
+Problem: Binary Search
+
+Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums. If target exists, then return its index. Otherwise, return -1.
+
+You must write an algorithm with O(log n) runtime complexity.
+
+🧪 Example 1:
+
+Input: nums = [-1,0,3,5,9,12], target = 9
+Output: 4
+Explanation: 9 exists in nums and its index is 4
+1. Problem Statement
+"Search for a target value in a sorted array and return its index. The algorithm must be logarithmic, O(log n)."
+
+📦 Input: nums = [-1,0,3,5,9,12], target = 9
+
+🎯 Output: 4 — The index of the target value.
+
+2. Real-life Analogy
+Imagine you are looking up a name in an old-school phonebook. You don't start at 'A' and go page-by-page. Instead, you open the book roughly in the middle. If the name you see is alphabetically after the one you're looking for, you discard the second half of the book and repeat the process on the first half. If the name is before, you discard the first half. You continue this process, eliminating half of the remaining pages each time, until you find the name.
+
+This process of repeatedly halving the search space is the core idea of Binary Search.
+
+3. Thought Process — Natural Logic
+The problem statement explicitly mentions a sorted array and an O(log n) time complexity requirement. These two facts are the hallmarks of a Binary Search algorithm.
+
+The core idea is to maintain a search range defined by a left and right pointer. We repeatedly check the middle element of this range to decide which half to continue searching in.
+
+Start with left pointing to the first element and right pointing to the last.
+
+In each step, calculate the middle index mid.
+
+Compare the element at mid with the target:
+
+If nums[mid] is equal to target, we've found our answer. Return mid.
+
+If nums[mid] is less than target, we know the target must be in the right half of the current search space. We discard the left half by moving left to mid + 1.
+
+If nums[mid] is greater than target, the target must be in the left half. We discard the right half by moving right to mid - 1.
+
+The process stops when left becomes greater than right. If we get to this point, it means the target was not found in the array.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Use a simple for loop to iterate through the array from the beginning to the end.
+
+At each index, compare the element with the target.
+
+If a match is found, return the current index.
+
+If the loop finishes without finding a match, return -1.
+
+⏳ Time Complexity: O(n) — In the worst case, we have to check every element.
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Binary Search)
+💡 Core Idea: Repeatedly divide the search space in half until the target is found or the search space is empty.
+
+Logic:
+
+Initialize two pointers: left = 0 and right = n - 1, where n is the length of the array.
+
+Start a loop that continues as long as left <= right.
+
+Inside the loop, calculate the middle index: mid = left + (right - left) // 2.
+
+Compare nums[mid] with target:
+
+If nums[mid] == target, return mid.
+
+If nums[mid] < target, the new search space is to the right. Update left = mid + 1.
+
+If nums[mid] > target, the new search space is to the left. Update right = mid - 1.
+
+If the loop completes without finding the target, it doesn't exist. Return -1.
+
+⏳ Time Complexity: O(log n) — The search space is halved in each iteration.
+
+💾 Space Complexity: O(1) — We only use a few variables for the pointers.
+
+6. Pseudocode (with explanation)
+Function search(nums, target):
+    left = 0
+    right = length of nums - 1
+
+    While left <= right:
+        mid = left + (right - left) // 2
+        
+        If nums[mid] == target:
+            Return mid
+        Else If nums[mid] < target:
+            // Target must be in the right half
+            left = mid + 1
+        Else:
+            // Target must be in the left half
+            right = mid - 1
+    
+    // Target was not found
+    Return -1
+7. Python Code (with comments)
+Python
+
+def search(nums, target):
+    """
+    Performs binary search on a sorted array.
+    """
+    left, right = 0, len(nums) - 1
+
+    while left <= right:
+        # Using integer division to prevent floating point issues.
+        # This formula prevents potential overflow in other languages,
+        # though not an issue in Python.
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            return mid
+        elif nums[mid] < target:
+            # The target is in the right half.
+            left = mid + 1
+        else: # nums[mid] > target
+            # The target is in the left half.
+            right = mid - 1
+    
+    # If we exit the loop, the target was not found.
+    return -1
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number}
+ */
+function search(nums, target) {
+    let left = 0;
+    let right = nums.length - 1;
+
+    while (left <= right) {
+        // Calculate the middle index using floor to ensure it's an integer.
+        const mid = Math.floor(left + (right - left) / 2);
+
+        if (nums[mid] === target) {
+            return mid;
+        } else if (nums[mid] < target) {
+            // Target is in the right half.
+            left = mid + 1;
+        } else {
+            // Target is in the left half.
+            right = mid - 1;
+        }
+    }
+
+    // Target not found.
+    return -1;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+left = 0, right = ...	Initializes pointers	"I'll start my search by looking at the whole array."
+while left <= right	Defines search space	"As long as there's still a part of the array to check..."
+mid = ...	Finds the middle	"I'll find the middle of the current part of the array I'm looking at."
+if nums[mid] == target	Found it!	"If the middle number is my target, I'm done! I'll return its position."
+if nums[mid] < target	Discards left half	"The middle number is too small. I'll get rid of the left half and only look at the right half now."
+else (nums[mid] > target)	Discards right half	"The middle number is too big. I'll get rid of the right half and only look at the left half now."
+return -1	Target not found	"I've checked everywhere and the target isn't here."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Linear Search)	O(n)	O(1)
+Optimized (Binary Search)	O(log n)	O(1)
+Note: n=len(nums).

@@ -1,0 +1,223 @@
+Problem: Encode and Decode Strings
+
+Design an algorithm to encode a list of strings to a single string. The encoded string is then decoded back to the original list of strings.
+
+Please implement encode and decode.
+
+🧪 Example 1:
+
+Input: ["neet","code","love","you"]
+Output:["neet","code","love","you"]
+1. Problem Statement
+"Design an algorithm to encode a list of strings to a single string. The encoded string is then decoded back to the original list of strings."
+
+📦 Input: ["neet","code","love","you"]
+
+🎯 Output: ["neet","code","love","you"] — The original list is perfectly restored.
+
+2. Real-life Analogy
+Imagine you have several pieces of mail to send, and for some reason, you can only put them all into a single envelope. The problem is, you need to make sure the recipient can tell where one letter ends and the next begins.
+
+Encoding: You could write the length of each letter on its front before putting it in the envelope. For "Hi there," you'd write 9 and then the letter. Then for the next letter, you do the same thing. (9)Hi there(5)Hello...
+
+Decoding: When the recipient opens the envelope, they read the first number, say 9. They know the next 9 characters belong to the first letter. After reading Hi there, they look for the next number, which tells them the length of the next letter.
+
+This strategy guarantees the recipient can separate the letters correctly, no matter what they contain.
+
+3. Thought Process — Natural Logic
+The main challenge is the delimiter. How do we separate the strings?
+
+Bad Idea: Using a simple character like , or       to separate the strings. What if a string itself is "hello, world"? The decoder would see the comma and think it's a separator.
+
+Better Idea: We need a foolproof way to tell the decoder how long each string is before it reads it. The most robust approach is to prepend each string with its length and a special delimiter (e.g., #).
+
+The format will look like this: [length]#string[length]#string...
+
+4. Optimized Approach (Prefixing Length)
+💡 Core Idea: For each string, we will prefix its length followed by a non-numeric delimiter like #.
+
+Encoding (encode(strs)):
+
+Create an empty result string.
+
+For each string in the input list strs:
+
+Get its length.
+
+Append the length, followed by #, followed by the string itself, to the result string.
+
+Return the final result string.
+
+Decoding (decode(s)):
+
+Create an empty result list.
+
+Use a pointer, let's call it i, initialized to 0, to iterate through the encoded string s.
+
+While i is less than the length of s:
+
+Find the index of the next # character starting from i.
+
+The substring from i to the # index is the length. Convert this substring to an integer.
+
+The actual string content starts right after the # and has a length equal to the integer we just read.
+
+Extract the string content.
+
+Add the extracted string to the result list.
+
+Move the pointer i to the beginning of the next length prefix. This is (index of #) + 1 + (length of string).
+
+Return the final result list.
+
+⏳ Time Complexity: O(N)
+
+N is the total number of characters across all strings.
+
+encode: We visit each character once to build the new string.
+
+decode: We visit each character once to read the lengths and strings.
+
+💾 Space Complexity: O(N)
+
+encode: We need to create a new string of size proportional to N.
+
+decode: We need to store the decoded strings in a list, which in the worst case could be all the individual characters, resulting in O(N) space.
+
+5. Pseudocode (with explanation)
+Function encode(strs):
+    encoded_string = ""
+    For each s in strs:
+        // Get the length of the current string and convert it to a string
+        length_str = convert length of s to a string
+
+        // Append the length, delimiter, and string content
+        encoded_string = encoded_string + length_str + "#" + s
+
+    Return encoded_string
+
+Function decode(s):
+    result = []
+    i = 0  // A pointer to the current position in the string
+
+    While i < length of s:
+        // Find the index of the delimiter (#)
+        delimiter_index = find first "#" starting from i
+
+        // Extract the length as a substring and convert it to an integer
+        length_str = s from index i to delimiter_index
+        length = convert length_str to an integer
+
+        // Calculate the starting position of the string content
+        string_start = delimiter_index + 1
+
+        // Extract the string content
+        string_content = s from string_start with length
+
+        // Add the decoded string to the result list
+        append string_content to result
+
+        // Move the pointer i to the beginning of the next length prefix
+        i = string_start + length
+
+    Return result
+6. Python Code (with comments)
+Python
+
+class Solution:
+    def encode(self, strs: list[str]) -> str:
+        res = ""
+        # Iterate through each string in the input list
+        for s in strs:
+            # Prepend the string with its length and a delimiter
+            res += str(len(s)) + "#" + s
+        return res
+
+    def decode(self, s: str) -> list[str]:
+        res = []
+        i = 0  # Pointer to our current position in the encoded string
+
+        # Iterate until the pointer reaches the end of the string
+        while i < len(s):
+            j = i  # Pointer to find the delimiter
+
+            # Find the end of the length prefix (the position of '#')
+            while s[j] != '#':
+                j += 1
+
+            # The length is the substring between i and j
+            length = int(s[i:j])
+
+            # The string itself starts one character after the delimiter
+            string_start = j + 1
+            string_end = string_start + length
+
+            # Extract the actual string
+            res.append(s[string_start:string_end])
+
+            # Move the main pointer to the start of the next length prefix
+            i = string_end
+
+        return res
+7. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {string[]} strs
+ * @return {string}
+ */
+function encode(strs) {
+    let encodedString = "";
+    // Iterate through each string in the input array.
+    for (const str of strs) {
+        // We prepend the length of the string and a delimiter.
+        encodedString += str.length + "#" + str;
+    }
+    return encodedString;
+}
+
+/**
+ * @param {string} s
+ * @return {string[]}
+ */
+function decode(s) {
+    const decodedStrings = [];
+    let i = 0; // Pointer for decoding the string.
+
+    // Loop through the encoded string.
+    while (i < s.length) {
+        let j = i;
+        // Find the delimiter '#'.
+        while (s[j] !== '#') {
+            j++;
+        }
+
+        // The length is the number before the delimiter.
+        const length = parseInt(s.substring(i, j));
+
+        // The string content starts right after the delimiter.
+        const stringStart = j + 1;
+
+        // Extract the substring using the length.
+        const str = s.substring(stringStart, stringStart + length);
+        decodedStrings.push(str);
+
+        // Move the pointer to the start of the next encoded string.
+        i = stringStart + length;
+    }
+    return decodedStrings;
+}
+8. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+encode	res += len + '#' + s	"For each item, write its size on the front, then the item itself."
+decode	find first '#' from i	"Start reading at my current position, and find the length number by looking for the # delimiter."
+length = int(s[i:j])	Reads the length number	"The characters before the # tell me how long the next item is."
+string_content = s[string_start:string_end]	Reads the item itself	"Now I'll read exactly that many characters to get the item."
+i = string_end	Moves the pointer	"My work is done here; I'll move to the end of this item so I can start on the next one."
+
+Export to Sheets
+9. Summary
+Method	Time	Space
+Encode (Optimized)	O(N)	O(N)
+Decode (Optimized)	O(N)	O(N)
+Note: N is the total number of characters across all strings.

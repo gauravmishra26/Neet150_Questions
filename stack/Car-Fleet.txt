@@ -1,0 +1,207 @@
+Problem: Car Fleet
+
+There are n cars traveling to the same destination on a one-lane highway.
+You are given two arrays of integers position and speed, both of length n.
+A car cannot pass another car ahead of it. It can only catch up to another car and then drive at the same speed as the car ahead of it.
+A car fleet is a non-empty set of cars driving at the same position and same speed. A single car is also considered a car fleet.
+Return the number of different car fleets that will arrive at the destination.
+
+🧪 Example 1:
+
+Input: target = 10, position = [1,4], speed = [3,2]
+Output: 1
+Explanation: The cars starting at 1 (speed 3) and 4 (speed 2) become a fleet, meeting each other at 10, the destination.
+1. Problem Statement
+"Count the number of car fleets that arrive at a destination, where a faster car behind a slower car merges with it."
+
+📦 Input: target = 10, position = [1,4], speed = [3,2]
+
+🎯 Output: 1 — The car at position 1 catches up to the car at position 4 exactly at the destination.
+
+2. Real-life Analogy
+Imagine a group of friends driving to the same concert venue. Each friend has their own car and drives at a different speed. The rule is, if a faster driver catches up to a slower driver, they become a group and travel at the slower driver's speed. We want to count how many distinct groups arrive at the venue.
+
+The group leader is the car in front, and their arrival time dictates the group's arrival time. Any car behind that arrives at the destination at the same time or earlier will merge with the leading car's group.
+
+3. Thought Process — Natural Logic
+The most crucial insight is that a car can only ever catch up to a car that is ahead of it. This means we should process the cars in order of their position, from the one closest to the destination to the one furthest away.
+
+Wait, that's not right. We should process them from furthest to closest to the destination. Let's reconsider.
+
+If we process cars from furthest to closest:
+
+The car at position 10 will arrive at some time. This car will be a fleet leader.
+
+The car at position 8 will arrive at some time. If this time is slower than the leader at position 10, it will be a new fleet. If it is faster, it will catch up.
+
+This seems like a stack logic. Let's try to formalize it.
+
+Corrected logic (processing from closest to furthest):
+
+Start with the car closest to the destination. This car, by definition, will be the leader of a new fleet.
+
+Calculate its arrival time at the destination.
+
+Now, consider the next car in line (the one just behind the current leader).
+
+Calculate its arrival time.
+
+If this car's arrival time is greater than the leader's arrival time, it means this car is too slow and will never catch up. It will form a new fleet, and it becomes the new fleet leader. We increment our fleet count.
+
+If this car's arrival time is less than or equal to the leader's arrival time, it means it will catch up to the leader. It will merge into the current fleet and not form a new one.
+
+This approach works and is simpler than the "furthest to closest" logic because we only need to keep track of one variable: the arrival time of the last fleet leader.
+
+4. Less Optimized Approach (Simulation)
+Logic:
+
+Simulate the cars' movements in discrete time steps (e.g., minute by minute).
+
+At each time step, update the position of each car.
+
+Check for car collisions/mergers. If position[i+1] becomes less than or equal to position[i], they merge and their speeds become the same.
+
+This approach is complicated by the continuous nature of time and the precision required for float calculations. It's prone to edge-case errors.
+
+⏳ Time Complexity: Hard to analyze, potentially very high.
+
+💾 Space Complexity: O(n).
+
+5. Optimized Approach (Sorting + One Pass)
+💡 Core Idea: Sort cars by their position. Then, iterate backward, from the car closest to the destination. Track the arrival time of the last fleet leader.
+
+Logic:
+
+Create a list of pairs (position, speed) for each car.
+
+Sort this list in ascending order based on the position (from furthest to closest to the destination).
+
+Initialize fleet_count = 0 and time_of_last_fleet = 0.
+
+Iterate through the sorted cars in reverse order (from closest to furthest from the destination).
+
+For each car, calculate its time to reach the destination: time_to_target = (target - position) / speed.
+
+Compare this time_to_target with time_of_last_fleet.
+
+If time_to_target > time_of_last_fleet, this car cannot catch up to the fleet in front of it. It will form a new, separate fleet.
+
+Increment fleet_count.
+
+Update time_of_last_fleet = time_to_target.
+
+If time_to_target <= time_of_last_fleet, this car will catch up to the fleet in front of it and merge. We don't form a new fleet.
+
+Return fleet_count.
+
+⏳ Time Complexity: O(n log n) due to the sorting step. The single pass is O(n).
+
+💾 Space Complexity: O(n) to store the pairs, or O(1) if we sort indices instead of pairs.
+
+6. Pseudocode (with explanation)
+Function carFleet(target, position, speed):
+    n = length of position
+    If n == 0:
+        return 0
+    
+    // Combine position and speed, and sort by position.
+    cars = new list of (position, speed) pairs
+    For i from 0 to n-1:
+        cars.add((position[i], speed[i]))
+    
+    cars.sort(by position, ascending)
+
+    fleet_count = 0
+    time_of_last_fleet = 0.0
+
+    // Iterate in reverse (from closest to farthest from target)
+    For i from n-1 down to 0:
+        current_pos = cars[i].position
+        current_speed = cars[i].speed
+        
+        current_time_to_target = (target - current_pos) / current_speed
+        
+        // If current car arrives later than the fleet ahead, it forms a new fleet.
+        If current_time_to_target > time_of_last_fleet:
+            fleet_count++
+            time_of_last_fleet = current_time_to_target
+            
+    return fleet_count
+7. Python Code (with comments)
+Python
+
+def car_fleet(target, position, speed):
+    if not position:
+        return 0
+        
+    # Combine position and speed into pairs and sort them by position.
+    cars = sorted(zip(position, speed))
+    
+    fleets = 0
+    time_of_last_fleet = 0.0
+    
+    # Iterate through the sorted cars in reverse order.
+    # The last car in the sorted list is the one closest to the target.
+    for i in range(len(cars) - 1, -1, -1):
+        pos, spd = cars[i]
+        
+        # Calculate the time for the current car to reach the destination.
+        current_time_to_target = (target - pos) / spd
+        
+        # If this car arrives later than the previous fleet leader, it forms a new fleet.
+        if current_time_to_target > time_of_last_fleet:
+            fleets += 1
+            time_of_last_fleet = current_time_to_target
+            
+    return fleets
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number} target
+ * @param {number[]} position
+ * @param {number[]} speed
+ * @return {number}
+ */
+function carFleet(target, position, speed) {
+    if (position.length === 0) {
+        return 0;
+    }
+
+    // Combine into pairs and sort by position.
+    const cars = position.map((pos, i) => ({ pos: pos, spd: speed[i] }));
+    cars.sort((a, b) => a.pos - b.pos);
+    
+    let fleets = 0;
+    let timeOfLastFleet = 0;
+
+    // Iterate backwards from the car closest to the target.
+    for (let i = cars.length - 1; i >= 0; i--) {
+        const { pos, spd } = cars[i];
+        
+        const currentTimeToTarget = (target - pos) / spd;
+        
+        if (currentTimeToTarget > timeOfLastFleet) {
+            fleets++;
+            timeOfLastFleet = currentTimeToTarget;
+        }
+    }
+    
+    return fleets;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+cars = sorted(...)	Combines and sorts cars	"I'll make a list of all cars and their speeds, then arrange them from the one furthest from the goal to the one closest."
+timeOfLastFleet = 0	Tracks fleet time	"I'll keep a running track of the arrival time of the last car that became a fleet leader."
+for i from n-1 down to 0	Iterates backwards	"I'll start with the car closest to the destination and work my way back."
+currentTimeToTarget = ...	Calculates time	"For each car, I'll figure out how long it will take to get to the destination on its own."
+if currentTimeToTarget > ...	Checks for a new fleet	"If this car will arrive later than the previous fleet leader, it means it's too slow to catch up. It will be a new fleet."
+fleets++	Counts a new fleet	"I'll add 1 to my fleet count."
+timeOfLastFleet = ...	Updates fleet time	"This new car is now the leader of the newest fleet. I'll remember its arrival time."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Simulation)	High (Potentially O(n*T))	O(n)
+Optimized (Sorting + One Pass)	O(n log n)	O(n)
+Note: n is the number of cars.		

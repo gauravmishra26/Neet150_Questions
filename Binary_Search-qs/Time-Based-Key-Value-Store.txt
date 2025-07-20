@@ -1,0 +1,248 @@
+Problem: Time Based Key-Value Store
+
+Implement a time-based key-value data structure that supports:
+
+Storing multiple values for the same key at specified time stamps
+
+Retrieving the key's value at a specified timestamp
+
+Implement the TimeMap class:
+
+TimeMap() Initializes the object.
+
+void set(String key, String value, int timestamp) Stores the key key with the value value at the given time timestamp.
+
+String get(String key, int timestamp) Returns the most recent value of key if set was previously called on it and the most recent timestamp for that key prev_timestamp is less than or equal to the given timestamp (prev_timestamp <= timestamp). If there are no values, it returns "".
+Note: For all calls to set, the timestamps are in strictly increasing order.
+
+🧪 Example 1:
+
+Input: ["TimeMap", "set", ["alice", "happy", 1], "get", ["alice", 1], "get", ["alice", 2], "set", ["alice", "sad", 3], "get", ["alice", 3]]
+Output: [null, null, "happy", "happy", null, "sad"]
+1. Problem Statement
+"Design a data structure that stores key-value pairs with timestamps. The get operation should return the value with the latest timestamp that is less than or equal to the query timestamp."
+
+📦 Input: A sequence of calls to set and get.
+
+🎯 Output: The return values for the get calls.
+
+2. Real-life Analogy
+Imagine a version control system for a document. Each time you save the document, it's a set operation with a new timestamp. When you want to view the document, you can specify a timestamp (get). The system should show you the document as it existed at that exact moment, or if no save occurred then, the last saved version before that time. This is also called a "snapshot" or "point-in-time" query.
+
+The core challenge is efficiently finding that "most recent" version for a given query time.
+
+3. Thought Process — Natural Logic
+We need a data structure that can handle two operations: set and get.
+
+Data Structure for set: We need to store data for different keys. A hash map (or dictionary) is the perfect choice for this, mapping a string key to some other data structure. What should this data structure be? For a given key, we have multiple (timestamp, value) pairs. Since the set operation guarantees strictly increasing timestamps, we can simply use a list or array to store these pairs. The newest pair will just be appended to the end.
+
+Data Structure for get: This is the more complex operation. We are given a key and a timestamp. We need to find the value associated with the largest prev_timestamp that is less than or equal to the given timestamp.
+
+We have a sorted list of timestamp-value pairs for each key.
+
+We need to find an element in this sorted list.
+
+This is a classic problem that can be solved very efficiently with Binary Search. We are not looking for an exact match, but rather for the "floor" value—the largest timestamp less than or equal to the target.
+
+4. Less Optimized Approach (Brute Force get)
+Logic:
+
+The set operation would be the same (using a hash map to store lists of pairs).
+
+For the get operation, retrieve the list of (timestamp, value) pairs for the given key.
+
+Iterate backward through this list from the most recent pair.
+
+The first pair you find with a timestamp <= the query timestamp is the answer. Return its value.
+
+⏳ Time Complexity:
+
+set: O(1) on average.
+
+get: O(N), where N is the number of set calls for that specific key. This could be slow if there are many set calls for the same key.
+
+💾 Space Complexity: O(S), where S is the total number of (key, value, timestamp) triplets stored.
+
+5. Optimized Approach (Hash Map + Binary Search)
+💡 Core Idea: Use a hash map to quickly find the correct list of values, then use binary search on that list to find the desired value in logarithmic time.
+
+TimeMap Class Structure:
+
+A member variable, a hash map (e.g., this.store), to map each key to an array of objects/tuples, where each object holds a timestamp and a value.
+
+set(key, value, timestamp) Method:
+
+If the key is not already in the hash map, initialize an empty array for it.
+
+Append the new {timestamp, value} pair to the array. This is an O(1) operation since timestamps are strictly increasing.
+
+get(key, timestamp) Method:
+
+Check if the key exists in the hash map. If not, return "".
+
+Get the array of pairs for that key.
+
+Perform a binary search on this array to find the largest timestamp t where t <= timestamp.
+
+Initialize left = 0, right = array.length - 1, and result_val = "".
+
+While left <= right:
+
+mid = left + (right - left) // 2.
+
+current_timestamp = array[mid].timestamp.
+
+If current_timestamp <= timestamp:
+
+This is a possible answer. Store its value and try to find a more recent one by searching in the right half: result_val = array[mid].value, left = mid + 1.
+
+If current_timestamp > timestamp:
+
+This timestamp is too recent. Search in the left half: right = mid - 1.
+
+Return result_val.
+
+⏳ Time Complexity:
+
+set: O(1) on average.
+
+get: O(log N), where N is the number of set calls for that specific key.
+
+💾 Space Complexity: O(S) for storing all data.
+
+6. Pseudocode (with explanation)
+Class TimeMap:
+    Constructor:
+        this.store = new Dictionary/HashMap
+
+    Method set(key, value, timestamp):
+        If key not in this.store:
+            this.store[key] = new List/Array
+        this.store[key].append((timestamp, value))
+
+    Method get(key, timestamp):
+        If key not in this.store:
+            Return ""
+        
+        history = this.store[key]
+        result_value = ""
+        
+        left = 0
+        right = length of history - 1
+        
+        While left <= right:
+            mid = left + (right - left) // 2
+            current_timestamp = history[mid].timestamp
+            
+            If current_timestamp <= timestamp:
+                // This is a candidate for the answer.
+                result_value = history[mid].value
+                // Try to find a more recent one.
+                left = mid + 1
+            Else:
+                // This timestamp is too recent.
+                right = mid - 1
+                
+        Return result_value
+7. Python Code (with comments)
+Python
+
+from collections import defaultdict
+
+class TimeMap:
+    def __init__(self):
+        # A dictionary mapping key to a list of (timestamp, value) pairs.
+        self.store = defaultdict(list)
+
+    def set(self, key, value, timestamp):
+        # Timestamps are strictly increasing, so we just append.
+        self.store[key].append((timestamp, value))
+
+    def get(self, key, timestamp):
+        if key not in self.store:
+            return ""
+
+        history = self.store[key]
+        result_value = ""
+        
+        left, right = 0, len(history) - 1
+
+        # Binary search for the latest timestamp <= the given timestamp.
+        while left <= right:
+            mid = (left + right) // 2
+            current_timestamp, current_value = history[mid]
+            
+            if current_timestamp <= timestamp:
+                # This timestamp is a possible answer.
+                # We continue searching right to find a more recent one.
+                result_value = current_value
+                left = mid + 1
+            else:
+                # This timestamp is too recent.
+                right = mid - 1
+                
+        return result_value
+8. JavaScript Code (with comments)
+JavaScript
+
+class TimeMap {
+    constructor() {
+        this.store = new Map();
+    }
+
+    set(key, value, timestamp) {
+        if (!this.store.has(key)) {
+            this.store.set(key, []);
+        }
+        // Timestamps are strictly increasing, so we just push to the end.
+        this.store.get(key).push({ timestamp, value });
+    }
+
+    get(key, timestamp) {
+        if (!this.store.has(key)) {
+            return "";
+        }
+
+        const history = this.store.get(key);
+        let resultValue = "";
+        
+        let left = 0;
+        let right = history.length - 1;
+
+        // Binary search for the latest timestamp <= the given timestamp.
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            const { timestamp: currentTimestamp, value: currentValue } = history[mid];
+
+            if (currentTimestamp <= timestamp) {
+                // This is a possible answer. Store it and try to find a more recent one.
+                resultValue = currentValue;
+                left = mid + 1;
+            } else {
+                // This timestamp is too recent. Search in the left half.
+                right = mid - 1;
+            }
+        }
+
+        return resultValue;
+    }
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+this.store = ...	Initializes the data	"I'll use a dictionary to store all the data, with a key for each different item."
+set(...)	Stores a value	"I'll add this new value and its timestamp to the correct item's list. Since it's the latest, I'll just put it at the end."
+get(...)	Retrieves a value	"Someone wants the value for an item at a specific time. I'll search for it."
+left = 0, right = ...	Defines search space	"I'll use a binary search on the list of timestamp-value pairs for this item."
+while left <= right	Binary search loop	"I'll keep looking until I find the best match."
+if current_ts <= timestamp	Finds a candidate	"This timestamp is a good candidate, as it's not after the time I'm looking for. I'll remember its value and see if I can find an even more recent one."
+left = mid + 1	Narrows search range	"Since this one was a good candidate, I'll search the right half for something even better (more recent)."
+else ...	Discards candidate	"This timestamp is too recent. I'll have to look at the older ones, so I'll search the left half."
+return result_value	Final result	"I've checked all possibilities, and this is the best value I could find for that time."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+set	O(1) avg.	O(S)
+get (Brute Force)	O(N)	O(S)
+get (Optimized)	O(log N)	O(S)
+Note: N is number of set calls for a key, S is total number of triplets.	

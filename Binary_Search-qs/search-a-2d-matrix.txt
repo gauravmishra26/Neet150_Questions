@@ -1,0 +1,201 @@
+Problem: Search a 2D Matrix
+
+You are given an m x n 2-D integer array matrix and an integer target.
+
+Each row in matrix is sorted in non-decreasing order.
+The first integer of every row is greater than the last integer of the previous row.
+Return true if target exists within matrix or false otherwise.
+Can you write a solution that runs in O(log(m * n)) time?
+
+🧪 Example 1:
+
+Input: matrix = [[1,2,4,8],[10,11,12,13],[14,20,30,40]], target = 10
+Output: true
+1. Problem Statement
+"Given a sorted 2D matrix, find a target value in logarithmic time. The matrix is sorted both row-wise and across rows."
+
+📦 Input: matrix = [[1,2,4,8],[10,11,12,13],[14,20,30,40]], target = 10
+
+🎯 Output: true — The target 10 is present in the matrix.
+
+2. Real-life Analogy
+Imagine a large, multi-volume encyclopedia. Each volume is a row, and the articles within it are the columns. The volumes are ordered by topic, and the articles within each volume are also ordered. To find a specific article, you first quickly figure out which volume it would be in, then you open that volume and quickly find the page you need.
+
+This two-step process (first finding the right row, then searching within it) is one way to approach this. But an even faster way is to treat the whole encyclopedia as one long, continuous book and use a single search process that jumps around between volumes and pages.
+
+3. Thought Process — Natural Logic
+The problem has two key properties that make it perfect for binary search:
+
+The entire matrix is sorted. Because each row is sorted and the first element of a row is greater than the last of the previous, we can imagine the matrix as one single sorted array of size m * n.
+
+The O(log(m * n)) time complexity requirement. This is a strong hint that a logarithmic-time algorithm, such as Binary Search, is necessary.
+
+The most elegant solution is to perform a single binary search on this "flattened" 1D representation of the matrix. We can map a 1D index to its 2D coordinates and back.
+
+Total elements: m * n.
+
+Our search range will be from 0 to m*n - 1.
+
+Given a 1D index i, its 2D coordinates (row, col) can be calculated using integer division and the modulo operator:
+
+row = i // n
+
+col = i % n
+
+With this mapping, the standard binary search algorithm can be applied directly.
+
+4. Less Optimized Approach (Brute Force)
+Logic:
+
+Use nested loops to iterate through every element of the matrix.
+
+The outer loop i goes from 0 to m-1.
+
+The inner loop j goes from 0 to n-1.
+
+If matrix[i][j] equals the target, return true.
+
+If the loops complete without finding the target, return false.
+
+⏳ Time Complexity: O(m * n)
+
+💾 Space Complexity: O(1)
+
+5. Optimized Approach (Single Binary Search)
+💡 Core Idea: Treat the m x n matrix as a single sorted array of length m * n and apply binary search.
+
+Logic:
+
+Get the dimensions of the matrix: m (rows) and n (columns).
+
+Define the search range on the flattened array: left = 0, right = m * n - 1.
+
+Start a loop that continues as long as left <= right.
+
+Calculate the middle 1D index: mid = left + (right - left) // 2.
+
+Convert mid to 2D coordinates: row = mid // n, col = mid % n.
+
+Compare matrix[row][col] with target:
+
+If matrix[row][col] == target, return true.
+
+If matrix[row][col] < target, the target must be in the right half of the flattened array. Update left = mid + 1.
+
+If matrix[row][col] > target, the target must be in the left half. Update right = mid - 1.
+
+If the loop completes, the target was not found. Return false.
+
+⏳ Time Complexity: O(log(m * n))
+
+💾 Space Complexity: O(1)
+
+6. Pseudocode (with explanation)
+Function searchMatrix(matrix, target):
+    m = number of rows
+    n = number of columns
+    
+    left = 0
+    right = m * n - 1
+    
+    While left <= right:
+        mid_1D = left + (right - left) // 2
+        
+        row = mid_1D // n
+        col = mid_1D % n
+        
+        current_val = matrix[row][col]
+        
+        If current_val == target:
+            Return true
+        Else If current_val < target:
+            left = mid_1D + 1
+        Else:
+            right = mid_1D - 1
+            
+    Return false
+7. Python Code (with comments)
+Python
+
+def search_matrix(matrix, target):
+    m = len(matrix)
+    if m == 0:
+        return False
+    n = len(matrix[0])
+    if n == 0:
+        return False
+
+    left, right = 0, m * n - 1
+
+    while left <= right:
+        mid_1d = left + (right - left) // 2
+        
+        # Convert 1D index to 2D coordinates
+        row = mid_1d // n
+        col = mid_1d % n
+        
+        current_val = matrix[row][col]
+
+        if current_val == target:
+            return True
+        elif current_val < target:
+            left = mid_1d + 1
+        else: # current_val > target
+            right = mid_1d - 1
+    
+    return False
+8. JavaScript Code (with comments)
+JavaScript
+
+/**
+ * @param {number[][]} matrix
+ * @param {number} target
+ * @return {boolean}
+ */
+function searchMatrix(matrix, target) {
+    const m = matrix.length;
+    if (m === 0) return false;
+    const n = matrix[0].length;
+    if (n === 0) return false;
+
+    let left = 0;
+    let right = m * n - 1;
+
+    while (left <= right) {
+        const mid1D = Math.floor(left + (right - left) / 2);
+        
+        // Convert 1D index to 2D coordinates
+        const row = Math.floor(mid1D / n);
+        const col = mid1D % n;
+
+        const currentVal = matrix[row][col];
+        
+        if (currentVal === target) {
+            return true;
+        } else if (currentVal < target) {
+            left = mid1D + 1;
+        } else {
+            right = mid1D - 1;
+        }
+    }
+
+    return false;
+}
+9. Explanation Side-by-Side (Meaning-Wise)
+Step	What it does	Meaning
+m = ..., n = ...	Gets dimensions	"I'll get the number of rows and columns to figure out the total size of my search space."
+left = 0, right = ...	Initializes pointers	"I'll treat the entire matrix as one long line of numbers and start my search from the beginning to the end."
+while left <= right	Defines search space	"As long as there's still a part of the matrix to check..."
+mid_1D = ...	Finds the middle	"I'll find the middle position in my imaginary one-dimensional line of numbers."
+row = ..., col = ...	Maps to 2D	"Now I'll figure out which row and column that middle position corresponds to in the actual matrix."
+if current_val == target	Found it!	"If the number at that position is my target, I'm done!"
+if current_val < target	Discards left half	"The number is too small. I'll discard the entire portion of the matrix before it and only look at the part after."
+else (current_val > target)	Discards right half	"The number is too big. I'll discard the entire portion of the matrix after it and only look at the part before."
+return false	Target not found	"I've checked everywhere and the target isn't here."
+
+Export to Sheets
+10. Summary
+Method	Time	Space
+Brute Force (Nested Loop)	O(m * n)	O(1)
+Optimized (Binary Search)	O(log(m * n))	O(1)
+Note: m is number of rows, n is number of columns.	
